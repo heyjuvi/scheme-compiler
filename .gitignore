@@ -1,0 +1,4 @@
+build/
+program.ll
+program.o
+test.ll

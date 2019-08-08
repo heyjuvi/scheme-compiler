@@ -30,7 +30,7 @@ declare void @free(i8*)
 
 define i64 @___reserved_main() {
 	; allocate the heap and store its pointer
-	%heap_ptr = call i8* @calloc(i32 1000000000, i32 8)
+	%heap_ptr = call i8* @calloc(i32 10000, i32 8)
 	store i8* %heap_ptr, i8** @heap_base_ptr, align 8
 	; call the main program
 	%res = call i64 @scheme_main()
