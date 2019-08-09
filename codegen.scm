@@ -98,6 +98,10 @@
 (define (emit-begin x var env)
   (emit-begin_ (reverse (begin-body x)) var env))
 
+
+(define (emit-make-closure x var env)
+  ...)
+
 (define (emit-fetch-var x var env)
   (let ((val (cdr (assoc x env))))
     (if (not (eq? val #f))
@@ -121,6 +125,8 @@
      (emit-let x var env))
     ((begin? x)
      (emit-begin x var env))
+    ((make-closure? x)
+     (emit-make-closure x var env))
     ((list? x)
      (error "list? should not trigger at the moment" x))
     ((var? x)
