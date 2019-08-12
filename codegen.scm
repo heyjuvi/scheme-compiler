@@ -1,10 +1,5 @@
 (import chicken.format)
 
-(define (tagged-list? x tag)
-  (if (list? x)
-    (eq? (car x) tag)
-    #f))
-
 (define (extend-env var val env)
   (cons (cons var val) env))
 
@@ -98,9 +93,32 @@
 (define (emit-begin x var env)
   (emit-begin_ (reverse (begin-body x)) var env))
 
-
-(define (emit-make-closure x var env)
+(define (emit-function x env)
   ...)
+
+(define (emit-env x var env)
+  ; since x should be a list of symbols in the environment
+  ; it will be emitted through primcalls and fetches of
+  ; the environment variables from the heap
+  (emit-expr x var env))
+(define (emit-closure x var env)
+  ; emit a new closure with the function pointer to
+  ; the corresponding function and the free variables
+  ; set to the current values (when this code is called)
+  ; in the environment
+  (let* ((function-name
+	   (function-name->ll-name (closure-function x)))
+	 (signature
+	   (args-signature (add1 (closure-arity x))))
+	 (free-vars (closure-free-vars))
+	 (tmp1 (unique-var))
+	 (tmp2 (unique-var)))
+    (puts (format "  ~A = ptrtoint i64 (~A)* @~A to i64"
+		  tmp1
+		  signature,
+		  function-name))
+    (emit-env free-vars tmp2 env)
+    (emit-call3 "prim_closure" tmp1 tmp2 var)))
 
 (define (emit-fetch-var x var env)
   (let ((val (cdr (assoc x env))))
@@ -125,8 +143,8 @@
      (emit-let x var env))
     ((begin? x)
      (emit-begin x var env))
-    ((make-closure? x)
-     (emit-make-closure x var env))
+    ((closure? x)
+     (emit-closure x var env))
     ((list? x)
      (error "list? should not trigger at the moment" x))
     ((var? x)
@@ -135,11 +153,10 @@
 
 (define (emit-main exprs)
 ;  (for-each emit-global-variable (table-get 'global-variables))
-;  (for-each emit-lambda (table-get 'lambdas))
+  (for-each
+    (lambda (x) (emit-function x global-env))
+    functions)
   (puts "define i64 @scheme_main() {")
-
-;  (puts (format "%res = or i64 0, ~A" (immediate-rep 42)))
-;  (puts (format "%res = or i64 0, ~A" (immediate-rep '())))
   (emit-expr exprs "%res" '())
   (emit-return "%res")
   (puts "}"))
@@ -149,4 +166,4 @@
 	 (p-ast (preprocess (make-begin ast))))
     (emit-main p-ast)))
 
-(main)
+;(main)

@@ -3,7 +3,7 @@ project('lispy', 'c')
 source_combiner = find_program('cat')
 scheme_compiler = find_program('chicken')
 
-source_files = [ 'compat.scm', 'parser.scm', 'forms.scm', 'll.scm', 'preprocess.scm', 'data_types.scm', 'codegen.scm' ]
+source_files = [ 'compat.scm', 'parser.scm', 'forms.scm', 'll.scm', 'preprocess.scm', 'data-types.scm', 'closure-conversion.scm', 'codegen.scm' ]
 combined_source_file = 'combined.scm'
 c_source_file = 'combined.c'
 
