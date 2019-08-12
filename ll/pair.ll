@@ -34,3 +34,8 @@ define i64 @prim_pair_cdr(i64 %pair) {
 	; return the cdr
 	ret i64 %cdr
 }
+
+define i64 @prim_list_ref(i64 %start_pair, i64 index) {
+	; return the list element
+	ret i64 %res
+}

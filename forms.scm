@@ -25,7 +25,8 @@
         (eq? op 'equal?)
         (eq? op 'cons)
         (eq? op 'car)
-        (eq? op 'cdr)))
+        (eq? op 'cdr)
+        (eq? op 'list-ref)))
     #f))
 
 (define (if? x) (tagged-list? x 'if))

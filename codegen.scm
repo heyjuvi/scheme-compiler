@@ -2,6 +2,8 @@
 
 (define (extend-env var val env)
   (cons (cons var val) env))
+(define (extend-env-many vars vals env)
+  ...)
 
 (define (emit-immediate x var)
   (emit-copy var (fixnum->string (immediate-rep x))))
@@ -41,6 +43,10 @@
       ((eq? op 'cdr)
        (emit-expr (primcall-operand1 x) tmp1 env)
        (emit-call1 "prim_pair_cdr" tmp1 var))
+      ((eq? op 'list-ref)
+       (emit-expr (primcall-operand1 x) tmp1 env)
+       (emit-expr (primcall-operand2 x) tmp2 env)
+       (emit-call2 "prim_list_ref" tmp1 tmp2 var))
       (else (error "no such primcall")))))
 
 (define (emit-if x var env)
@@ -93,8 +99,20 @@
 (define (emit-begin x var env)
   (emit-begin_ (reverse (begin-body x)) var env))
 
+(define (args-str vars)
+    (cond
+      ((eq? vars '()) "")
+      ((eq? (length vars) 1) (format "i64 %~A" (car vars)))
+      (else (string-append (format "i64 %~A, " (car vars))
+			   (args-str (cdr vars))))))
 (define (emit-function x env)
-  ...)
+  (let* ((name (function-name x))
+         (args (function-args x))
+	 (vars (map (lambda (a) (unique-var)) args)))
+    (puts (format "define @~A(~A) {" name (args-str vars)))
+    (emit-expr (function-body x) "%res" (extend-env-many args vars env))
+    (emit-return "%res")
+    (puts "}")))
 
 (define (emit-env x var env)
   ; since x should be a list of symbols in the environment
@@ -106,10 +124,8 @@
   ; the corresponding function and the free variables
   ; set to the current values (when this code is called)
   ; in the environment
-  (let* ((function-name
-	   (function-name->ll-name (closure-function x)))
-	 (signature
-	   (args-signature (add1 (closure-arity x))))
+  (let* ((function-name (function-name->ll-name (closure-function x)))
+	 (signature (args-signature (add1 (closure-arity x))))
 	 (free-vars (closure-free-vars))
 	 (tmp1 (unique-var))
 	 (tmp2 (unique-var)))
