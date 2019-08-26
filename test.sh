@@ -9,6 +9,6 @@ cat ../ll/common.ll \
     test.ll > program.ll
 llc --filetype=obj program.ll
 clang -c -g ../driver.c
-clang -g -o driver driver.o program.o
+clang -g -o driver driver.o program.o -no-pie
 ./driver
 cd ../

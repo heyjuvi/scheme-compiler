@@ -1,5 +1,10 @@
 (import chicken.format)
 
+(define (debug x) 'ok)
+(define (debug-newline) 'ok)
+;(define (debug x) (display x))
+;(define (debug-newline) (newline))
+
 (define (extend-env var val env)
   (cons (cons var val) env))
 (define (extend-env-many vars vals env)
@@ -114,24 +119,34 @@
     (puts "}")))
 
 (define (emit-env x var env)
-  ; since x should be a list of symbols in the environment
-  ; it will be emitted through primcalls and fetches of
-  ; the environment variables from the heap
-  (emit-expr x var env))
+  (debug "EMIT-ENV -- env = ") (debug env) (debug-newline)
+  (if (null? x)
+    (emit-immediate '() var)
+    (let ((first-var (car x))
+          (rest-vars (cdr x))
+	  (tmp1 (unique-var))
+          (tmp2 (unique-var)))
+      (emit-fetch-var first-var tmp1 env)
+      (if (null? rest-vars)
+        (emit-immediate '() tmp2)
+        (emit-env rest-vars tmp2 env))
+      (emit-call2 "prim_pair_cons" tmp1 tmp2 var))))
 (define (emit-closure x var env)
   ; emit a new closure with the function pointer to
   ; the corresponding function and the free variables
   ; set to the current values (when this code is called)
   ; in the environment
-  (let* ((function-name (function-name->ll-name (closure-function x)))
+  (let* ((name (function-name->ll-name (closure-function x)))
 	 (signature (args-signature (add1 (closure-arity x))))
 	 (free-vars (closure-free-vars x))
 	 (tmp1 (unique-var))
 	 (tmp2 (unique-var)))
-    (puts (format "  ~A = ptrtoint i64 (~A)* @~A to i64"
+    (debug "EMIT-CLOSURE -- name = ") (debug name) (debug-newline)
+    (debug "EMIT-CLOSURE -- free-vars = ") (debug free-vars) (debug-newline)
+    (puts (format "  ~A = ptrtoint i64(~A)* @~A to i64"
 		  tmp1
 		  signature
-		  function-name))
+		  name))
     (emit-env free-vars tmp2 env)
     (emit-call2 "prim_closure" tmp1 tmp2 var)))
 
@@ -156,6 +171,9 @@
 	 (func-ptr-var (unique-var))
 	 (func-env-var (unique-var))
 	 (func-args (args-string (cons func-env-var arg-vars))))
+    (debug "EMIT-APPLICATION -- x = ") (debug x) (debug-newline)
+    (debug "EMIT-APPLICATION -- ev-list = ") (debug evaluated-list) (debug-newline)
+    (debug "EMIT-APPLICATION -- env = ") (debug env) (debug-newline)
     (emit-call1 "prim_closure_func_addr" closure-var func-addr-var)
     (emit-call1 "prim_closure_env" closure-var func-env-var)
     (puts (format "  ~A = inttoptr i64 ~A to i64(~A)*" func-ptr-var func-addr-var func-args-signature))
@@ -173,6 +191,7 @@
       (error "no such variable in env" x))))
 
 (define (emit-expr x var env)
+  (debug "EMIT-EXPR -- x = ") (debug x) (debug-newline)
   (cond
     ((immediate? x)
      (emit-immediate x var))
@@ -209,6 +228,8 @@
   (let* ((ast (parse))
 	 (p-ast (preprocess (make-begin ast)))
 	 (cp-ast (lambdas->closures p-ast)))
+    (debug functions) (debug-newline) (debug-newline)
+    (debug cp-ast) (debug-newline) (debug-newline)
     (emit-main cp-ast)))
 
 (main)

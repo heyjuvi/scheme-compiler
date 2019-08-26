@@ -46,6 +46,11 @@ define i64 @___reserved_main() {
 	ret i64 %res
 }
 
+;define i64 @main() {
+;	%res = call i64 @___reserved_main()
+;	ret i64 %res
+;}
+
 define i64 @___reserved_heap_store_i64(i64 %value) {
 	; get the globals for the heap
 	%base_ptr = load i8*, i8** @heap_base_ptr

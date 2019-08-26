@@ -71,7 +71,7 @@
 (define (function-name->ll-name x)
   (string-append "function_" x))
 
-(define (lambda? x) (tagged-list? x 'lambda))
+(define (lambda? x) (or (tagged-list? x 'lambda) (tagged-list? x 'λ)))
 (define (lambda-args x) (cadr x))
 (define (lambda-body x) (cddr x))
 
