@@ -179,7 +179,9 @@
 
 (define (main)
   (let* ((ast (parse))
-	 (p-ast (preprocess (make-begin ast))))
-    (emit-main p-ast)))
+	 (p-ast (preprocess (make-begin ast)))
+	 (cp-ast (lambdas->closures p-ast)))
+    (emit-main cp-ast)))
 
-;(main)
+(main)
+

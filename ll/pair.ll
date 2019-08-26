@@ -35,7 +35,8 @@ define i64 @prim_pair_cdr(i64 %pair) {
 	ret i64 %cdr
 }
 
-define i64 @prim_list_ref(i64 %start_pair, i64 index) {
+define i64 @prim_list_ref(i64 %start_pair, i64 %index) {
+	%res = add i64 0, 0
 	; return the list element
 	ret i64 %res
 }

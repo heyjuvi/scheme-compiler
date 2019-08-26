@@ -5,6 +5,7 @@ ninja
 cat ../ll/common.ll \
     ../ll/fixnum.ll \
     ../ll/pair.ll \
+    ../ll/closure.ll \
     test.ll > program.ll
 llc --filetype=obj program.ll
 clang -c -g ../driver.c
