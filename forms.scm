@@ -1,3 +1,5 @@
+(import srfi-13)
+
 (define (tagged-list? x tag)
   (if (and (list? x) (not (null? x)))
     (eq? (car x) tag)
@@ -87,13 +89,23 @@
     (else (string-append "i64, "
 			 (args-signature (- n 1))))))
 
+(define (args-string arg-vars)
+  (cond
+    ((null? arg-vars) "")
+    ((eq? (length arg-vars) 1) (format "i64 ~A" (car arg-vars)))
+    (else (string-append (format "i64 ~A, " (car arg-vars))
+			 (args-string (cdr arg-vars))))))
+
 (define (var? x) (symbol? x))
-(define (local-var? x) (eq? (string-ref x 0) #\%))
-(define (global-var? x) (eq? (string-ref x 0) #\%))
-(define (make-local-var str) (string-append "%" str))
-(define (make-global-var str) (string-append "@" str))
+
+(define (ll-var-name x) (string-drop x 1))
+(define (local-ll-var? x) (eq? (string-ref x 0) #\%))
+(define (global-ll-var? x) (eq? (string-ref x 0) #\%))
+(define (make-ll-local-var str) (string-append "%" str))
+(define (make-ll-global-var str) (string-append "@" str))
 
 (define (quote? x) (tagged-list? x 'quote))
+(define (quote-content x) (cdr x))
 
 (define (quasiquote? x) (tagged-list? x 'quasiquote))
 (define (unquote? x) (tagged-list? x 'unquote))

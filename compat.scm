@@ -39,8 +39,9 @@
     ((element? (car x) y) (set-union (cdr x) y))
     (else (set-union (cdr x) (cons (car x) y)))))
 (define (set-union-many x)
-  (if (null? x)
-    '()
-    (set-union (car x) (set-union-many (cdr x)))))
+  (cond
+    ((null? x) '())
+    ((equal? (length x) 1) (car x))
+    (else (set-union (car x) (set-union-many (cdr x))))))
 (define (set-substract x y)
   (filter (lambda (z) (not (element? z y))) x))

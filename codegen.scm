@@ -3,7 +3,12 @@
 (define (extend-env var val env)
   (cons (cons var val) env))
 (define (extend-env-many vars vals env)
-  ...)
+  (if (null? vars)
+    env
+    (extend-env-many
+      (cdr vars)
+      (cdr vals)
+      (cons (cons (car vars) (car vals)) env))))
 
 (define (emit-immediate x var)
   (emit-copy var (fixnum->string (immediate-rep x))))
@@ -99,17 +104,11 @@
 (define (emit-begin x var env)
   (emit-begin_ (reverse (begin-body x)) var env))
 
-(define (args-str vars)
-    (cond
-      ((eq? vars '()) "")
-      ((eq? (length vars) 1) (format "i64 %~A" (car vars)))
-      (else (string-append (format "i64 %~A, " (car vars))
-			   (args-str (cdr vars))))))
 (define (emit-function x env)
-  (let* ((name (function-name x))
+  (let* ((name (function-name->ll-name (function-name x)))
          (args (function-args x))
 	 (vars (map (lambda (a) (unique-var)) args)))
-    (puts (format "define @~A(~A) {" name (args-str vars)))
+    (puts (format "define i64 @~A(~A) {" name (args-string vars)))
     (emit-expr (function-body x) "%res" (extend-env-many args vars env))
     (emit-return "%res")
     (puts "}")))
@@ -126,23 +125,49 @@
   ; in the environment
   (let* ((function-name (function-name->ll-name (closure-function x)))
 	 (signature (args-signature (add1 (closure-arity x))))
-	 (free-vars (closure-free-vars))
+	 (free-vars (closure-free-vars x))
 	 (tmp1 (unique-var))
 	 (tmp2 (unique-var)))
     (puts (format "  ~A = ptrtoint i64 (~A)* @~A to i64"
 		  tmp1
-		  signature,
+		  signature
 		  function-name))
     (emit-env free-vars tmp2 env)
-    (emit-call3 "prim_closure" tmp1 tmp2 var)))
+    (emit-call2 "prim_closure" tmp1 tmp2 var)))
+
+; TODO: store quoted content
+(define (emit-quote x var env)
+  (let ((content (quote-content x)))
+    (if (null? content)
+      (emit-immediate '() var)
+      #f)))
+
+(define (emit-application x var env)
+  (let* ((evaluated-list
+	   (map (lambda (a)
+	          (let ((arg-var (unique-var)))
+		    (emit-expr a arg-var env)
+		    arg-var))
+	        x))
+	 (closure-var (car evaluated-list))
+	 (arg-vars (cdr evaluated-list))
+	 (func-args-signature (args-signature (add1 (length arg-vars))))
+	 (func-addr-var (unique-var))
+	 (func-ptr-var (unique-var))
+	 (func-env-var (unique-var))
+	 (func-args (args-string (cons func-env-var arg-vars))))
+    (emit-call1 "prim_closure_func_addr" closure-var func-addr-var)
+    (emit-call1 "prim_closure_env" closure-var func-env-var)
+    (puts (format "  ~A = inttoptr i64 ~A to i64(~A)*" func-ptr-var func-addr-var func-args-signature))
+    (puts (format "  ~A = call i64 ~A(~A)" var func-ptr-var func-args))))
 
 (define (emit-fetch-var x var env)
   (let ((val (cdr (assoc x env))))
     (if (not (eq? val #f))
       (cond
-	((local-var? val)
+	((local-ll-var? val)
 	 (emit-copy var val))
-	((global-var? val)
+	((global-ll-var? val)
 	 (emit-load var val))
 	(else (error "neither local nor global variable" val)))
       (error "no such variable in env" x))))
@@ -161,8 +186,11 @@
      (emit-begin x var env))
     ((closure? x)
      (emit-closure x var env))
+    ((quote? x)
+     (emit-quote x var env))
     ((list? x)
-     (error "list? should not trigger at the moment" x))
+     (emit-application x var env))
+;     (error "list? should not trigger at the moment" x))
     ((var? x)
      (emit-fetch-var x var env))
     (else (error "no such expression"))))

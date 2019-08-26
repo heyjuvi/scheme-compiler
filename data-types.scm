@@ -11,7 +11,7 @@
 (define bool-shift 7)
 (define bool-tag 31) ; 0011111b
 
-(define empty-list-tag 47) ; 00101111b
+(define empty-list 47) ; 00101111b
 
 (define (immediate-rep x)
   (cond
@@ -22,7 +22,7 @@
     ((boolean? x)
      (bit-or (shift-left (bool->fixnum x) bool-shift) bool-tag))
     ((null? x)
-     empty-list-tag)
+     empty-list)
     (else (error "no immediate representation"))))
 
 ; heap allocated types

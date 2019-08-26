@@ -17,7 +17,7 @@
 	   (let* ((function-args (cons 'c_env (lambda-args x)))
 		  (converted-body (lambdas->closures (lambda-body x)))
 		  (substituted-body (free-vars->env-refs converted-body free)))
-             (add-function (function name function-args substituted-body)))
+             (add-function (function name function-args (make-begin substituted-body))))
 	   (closure name arity free)))
 	((list? x) (map lambdas->closures x))
 	((immediate? x) x)
@@ -35,6 +35,7 @@
      (set-union (set-union-many (map free-vars (let-bindings-vals x)))
 		(set-substract (free-vars (let-body x))
                                (let-bindings-vars x))))
+    ((immediate? x) '())
     ((quote? x) '())
     ((null? x) '())
     ((primcall? x) (set-union-many (map free-vars (cdr x))))
@@ -49,6 +50,10 @@
        (if (eq? var-rep #f)
          x
          (cdr var-rep))))
+    ; TODO: let
+    ((immediate? x) x)
+    ((quote? x) x)
+    ((null? x) x)
     ((closure? x)
      (closure (closure-function x)
 	      (closure-arity x)
@@ -56,7 +61,7 @@
     ((list? x) (map (lambda (y) (free-vars->env-refs_ y reps)) x))
     (else (error "not implemented" (car x)))))
 (define (free-vars->env-refs x free)
-  (let ((reps (indexed-map (lambda (i e) `(,e list-ref c-env ,i))
+  (let ((reps (indexed-map (lambda (i e) `(,e list-ref c_env ,i))
 	                    free)))
     (free-vars->env-refs_ x reps)))
 

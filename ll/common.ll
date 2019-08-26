@@ -24,9 +24,15 @@ declare void @free(i8*)
 @prim_bool_true = global i64 159
 @prim_bool_false = global i64 31
 
+@prim_pair_empty_list = global i64 47
+
 @prim_heap_shift = global i64 3
 
 @prim_pair_tag = global i64 1
+@prim_vector_tag = global i64 2
+@prim_string_tag = global i64 3
+@prim_symbol_tag = global i64 5
+@prim_closure_tag = global i64 6
 
 define i64 @___reserved_main() {
 	; allocate the heap and store its pointer
@@ -51,6 +57,9 @@ define i64 @___reserved_heap_store_i64(i64 %value) {
 	%int_addr = ptrtoint i64* %i64_ptr to i64
 	; store the value
 	store i64 %value, i64* %i64_ptr, align 8
+	; increment the heap index
+	%new_index = add i64 %index, 8
+	store i64 %new_index, i64* @heap_index
 	; return the address stored to as an integer
 	ret i64 %int_addr
 }
