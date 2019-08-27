@@ -1,10 +1,5 @@
 (import chicken.format)
 
-(define (debug x) 'ok)
-(define (debug-newline) 'ok)
-;(define (debug x) (display x))
-;(define (debug-newline) (newline))
-
 (define (extend-env var val env)
   (cons (cons var val) env))
 (define (extend-env-many vars vals env)
@@ -102,6 +97,7 @@
   (emit-let_ x (let-bindings x) var env))
 
 (define (emit-begin_ body var env)
+  (debug (car body)) (debug-newline) (debug-newline)
   (if (not (null? body))
     (begin
       (emit-begin_ (cdr body) (unique-var) env)
@@ -180,6 +176,8 @@
     (puts (format "  ~A = call i64 ~A(~A)" var func-ptr-var func-args))))
 
 (define (emit-fetch-var x var env)
+  (debug "EMIT-FETCH-VAR -- x = ") (debug x) (debug-newline)
+  (debug "EMIT-FETCH-VAR -- env = ") (debug env) (debug-newline)
   (let ((val (cdr (assoc x env))))
     (if (not (eq? val #f))
       (cond
@@ -226,9 +224,11 @@
 
 (define (main)
   (let* ((ast (parse))
-	 (p-ast (preprocess (make-begin ast)))
-	 (cp-ast (lambdas->closures p-ast)))
+	 (p-ast (preprocess ast))
+	 (cp-ast (lambdas->closures (make-begin p-ast))))
     (debug functions) (debug-newline) (debug-newline)
+    (debug ast) (debug-newline) (debug-newline)
+    (debug p-ast) (debug-newline) (debug-newline)
     (debug cp-ast) (debug-newline) (debug-newline)
     (emit-main cp-ast)))
 

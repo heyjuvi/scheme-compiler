@@ -292,13 +292,6 @@
           (newline))))
     ast))
 
-(define (loop)
-  (next-char)
-  (let ((ast (parse)))
-    ;(print-ast ast "")
-    ast))
-
-;(loop)
-
 (next-char)
+
 

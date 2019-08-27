@@ -2,6 +2,14 @@
 (import chicken.format)
 (import srfi-1)
 
+(define dbg-enabled #f)
+(define tests-enabled #f)
+
+(define (debug x) (if dbg-enabled (display x) 'no-debugging))
+(define (debug-newline) (if dbg-enabled (newline) 'no-debugging))
+
+(define (puts str) (if (not dbg-enabled) (print str) 'debugging))
+
 (define (shift-left x n) (arithmetic-shift x n))
 (define (shift-right x n) (arithmetic-shift x (* (-1) n)))
 (define (bit-or x y) (bitwise-ior x y))
@@ -15,8 +23,6 @@
 (define (fixnum->char x) (integer->char x))
 
 (define (bool->fixnum x) (if x 1 0))
-
-(define (puts str) (print str))
 
 (define (indexed-map_ f l i)
   (if (null? l)
