@@ -1,15 +1,5 @@
 (import chicken.format)
 
-(define (extend-env var val env)
-  (cons (cons var val) env))
-(define (extend-env-many vars vals env)
-  (if (null? vars)
-    env
-    (extend-env-many
-      (cdr vars)
-      (cdr vals)
-      (cons (cons (car vars) (car vals)) env))))
-
 (define (emit-immediate x var)
   (emit-copy var (fixnum->string (immediate-rep x))))
 
@@ -32,6 +22,14 @@
        (emit-expr (primcall-operand1 x) tmp1 env)
        (emit-expr (primcall-operand2 x) tmp2 env)
        (emit-call2 "prim_fixnum_sub" tmp1 tmp2 var))
+      ((eq? op '*)
+       (emit-expr (primcall-operand1 x) tmp1 env)
+       (emit-expr (primcall-operand2 x) tmp2 env)
+       (emit-call2 "prim_fixnum_mul" tmp1 tmp2 var))
+      ((eq? op '/)
+       (emit-expr (primcall-operand1 x) tmp1 env)
+       (emit-expr (primcall-operand2 x) tmp2 env)
+       (emit-call2 "prim_fixnum_div" tmp1 tmp2 var))
       ((eq? op 'equal?)
        ; needs to be generalized (in ir) to other
        ; types
@@ -83,7 +81,10 @@
 
 (define (emit-let_ x bindings var env)
   (if (null? bindings)
-    (emit-expr (let-body x) var env)
+    ; we can car the body because by now, everything
+    ; should be wrapped by begin to give a single
+    ; expression
+    (emit-expr (car (let-body x)) var env)
     (let* ((b (car bindings))
 	   (b-var (let-binding-var b))
 	   (b-val (let-binding-val b))
@@ -113,6 +114,9 @@
     (emit-expr (function-body x) "%res" (extend-env-many args vars env))
     (emit-return "%res")
     (puts "}")))
+
+(define (emit-global-var global-var)
+  (puts (format "~A = global i64 0, align 8" global-var)))
 
 (define (emit-env x var env)
   (debug "EMIT-ENV -- env = ") (debug env) (debug-newline)
@@ -207,30 +211,56 @@
      (emit-quote x var env))
     ((list? x)
      (emit-application x var env))
-;     (error "list? should not trigger at the moment" x))
     ((var? x)
      (emit-fetch-var x var env))
     (else (error "no such expression"))))
 
 (define (emit-main exprs)
-;  (for-each emit-global-variable (table-get 'global-variables))
+  ; emit all global variable declarations
+  (for-each
+    (lambda (x)
+      (emit-global-var (cdr x)))
+    global-env)
+  ; emit all function definitions
+  ; TODO: they should be able to access to currently available
+  ;       global-env
   (for-each
     (lambda (x) (emit-function x global-env))
     functions)
   (puts "define i64 @scheme_main() {")
-  (emit-expr exprs "%res" '())
+  (let ((last-var #f))
+    (for-each
+      (lambda (x)
+        (cond
+	  ((define-var? x)
+	   (debug "EMIT-MAIN (emitting define var) -- x = ") (debug x) (debug-newline)
+           (let* ((tmp1 (unique-var))
+  	          (global1-symbol (define-id x))
+  	          (global1-name (symbol->string global1-symbol))
+  	          (global1 (string-append "@" global1-name)))
+	     ; we can car the body because by now, everything
+	     ; should be wrapped by begin to give a single
+	     ; expression
+  	     (emit-expr (car (define-body x)) tmp1 global-env)
+  	     (emit-store tmp1 global1)))
+  	  (else
+	    (set! last-var (unique-var))
+	    (emit-expr x last-var global-env))))
+      exprs)
+    (emit-copy "%res" last-var))
   (emit-return "%res")
   (puts "}"))
 
 (define (main)
   (let* ((ast (parse))
-	 (p-ast (preprocess ast))
-	 (cp-ast (lambdas->closures (make-begin p-ast))))
-    (debug functions) (debug-newline) (debug-newline)
-    (debug ast) (debug-newline) (debug-newline)
-    (debug p-ast) (debug-newline) (debug-newline)
-    (debug cp-ast) (debug-newline) (debug-newline)
-    (emit-main cp-ast)))
+	 (p-ast (map preprocess ast)))
+    (extract-global-vars p-ast)
+    (let ((cp-ast (map lambdas->closures p-ast)))
+      (debug functions) (debug-newline) (debug-newline)
+      (debug ast) (debug-newline) (debug-newline)
+      (debug p-ast) (debug-newline) (debug-newline)
+      (debug cp-ast) (debug-newline) (debug-newline)
+      (emit-main cp-ast))))
 
 (main)
 

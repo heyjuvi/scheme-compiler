@@ -24,6 +24,8 @@
         (eq? op 'sub1)
         (eq? op '+)
         (eq? op '-)
+        (eq? op '*)
+        (eq? op '/)
         (eq? op 'equal?)
         (eq? op 'cons)
         (eq? op 'car)
@@ -35,6 +37,8 @@
 (define (if-test x) (cadr x))
 (define (if-conseq x) (caddr x))
 (define (if-altern x) (cadddr x))
+(define (make-if test conseq altern)
+  (list 'if test conseq altern))
 
 (define (make-body x) (cons x '()))
 
@@ -104,7 +108,7 @@
 
 (define (ll-var-name x) (string-drop x 1))
 (define (local-ll-var? x) (eq? (string-ref x 0) #\%))
-(define (global-ll-var? x) (eq? (string-ref x 0) #\%))
+(define (global-ll-var? x) (eq? (string-ref x 0) #\@))
 (define (make-ll-local-var str) (string-append "%" str))
 (define (make-ll-global-var str) (string-append "@" str))
 
@@ -128,10 +132,12 @@
 
 (define (define? x) (tagged-list? x 'define))
 (define (define-id x) (cadr x))
-(define (define-function? x) (list? (define-id x)))
+(define (define-function? x)
+  (and (define? x) (list? (define-id x))))
 (define (define-function-name x) (car (define-id x)))
 (define (define-function-args x) (cdr (define-id x)))
-(define (define-var? x) (symbol? (define-id x)))
+(define (define-var? x)
+  (and (define? x) (symbol? (define-id x))))
 (define (define-body x) (cddr x))
 (define (make-define id body)
   (cons 'define (cons id body)))

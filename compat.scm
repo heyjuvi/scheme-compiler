@@ -51,3 +51,14 @@
     (else (set-union (car x) (set-union-many (cdr x))))))
 (define (set-substract x y)
   (filter (lambda (z) (not (element? z y))) x))
+
+(define (extend-env var val env)
+  (cons (cons var val) env))
+(define (extend-env-many vars vals env)
+  (if (null? vars)
+    env
+    (extend-env-many
+      (cdr vars)
+      (cdr vals)
+      (cons (cons (car vars) (car vals)) env))))
+

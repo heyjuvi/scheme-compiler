@@ -1,8 +1,21 @@
 (define global-env '())
+(define (add-global-var var val)
+  (set! global-env (extend-env var val global-env)))
 
 (define functions '())
 (define (add-function x)
   (set! functions (cons x functions)))
+
+(define (extract-global-vars top-level)
+  (for-each
+    (lambda (x)
+      (if (define-var? x)
+	(let* ((global-symbol (define-id x))
+	       (global-name (symbol->string global-symbol))
+	       (global (string-append "@" global-name)))
+	  (add-global-var global-symbol global))
+	'no-global-definition))
+  top-level))
 
 (define lambda-name-counter 0)
 (define (unique-lambda-name)
@@ -10,7 +23,10 @@
   (format "lambda~A" lambda-name-counter))
 
 (define (lambdas->closures x)
-  (cond ((lambda? x)
+  (cond ((define-var? x)
+	 (make-define-var (define-id x)
+			  (lambdas->closures (define-body x))))
+	((lambda? x)
 	 (let ((arity (length (lambda-args x)))
 	       (name (unique-lambda-name))
 	       (free (free-vars x)))
@@ -26,11 +42,16 @@
 	(else (error "not implemented" (car x)))))
 
 (define (free-vars x)
+  (debug "FREE-VARS -- x = ") (debug x) (debug-newline)
   (cond
     ((lambda? x)
      (set-substract (free-vars (lambda-body x))
 		    (lambda-args x)))
     ((closure? x) (closure-free-vars x))
+    ((if? x)
+     (set-union (free-vars (if-test x))
+		(set-union (free-vars (if-conseq x))
+			   (free-vars (if-altern x)))))
     ((let? x)
      (set-union (set-union-many (map free-vars (let-bindings-vals x)))
 		(set-substract (free-vars (let-body x))
@@ -41,7 +62,8 @@
     ((primcall? x) (set-union-many (map free-vars (cdr x))))
     ((list? x) (set-union-many (map free-vars x)))
     ((and (var? x) (not (assoc x global-env)))
-     (list x))))
+     (list x))
+    (else '())))
 
 (define (free-vars->env-refs_ x reps)
   (cond
