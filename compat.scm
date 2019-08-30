@@ -24,6 +24,17 @@
 
 (define (bool->fixnum x) (if x 1 0))
 
+(define (take lst n)
+  (cond
+    ((equal? n 0) '())
+    ((null? lst) '())
+    (else (cons (car lst) (take (cdr lst) (sub1 n))))))
+(define (drop lst n)
+  (cond
+    ((equal? n 0) lst)
+    ((null? lst) '())
+    (else (drop (cdr lst) (sub1 n)))))
+
 (define (indexed-map_ f l i)
   (if (null? l)
     '()

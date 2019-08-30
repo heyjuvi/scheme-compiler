@@ -14,7 +14,7 @@
   (puts (format "  ret i64 ~A" str)))
 
 (define (emit-alloca var)
-  (puts (format "  ~A = alloca i64" var)))
+  (puts (format "  ~A = alloca i64, align 8" var)))
 
 (define (emit-copy to from)
   (puts (format "  ~A = add i64 ~A, 0" to from)))

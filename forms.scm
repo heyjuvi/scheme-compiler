@@ -30,7 +30,8 @@
         (eq? op 'cons)
         (eq? op 'car)
         (eq? op 'cdr)
-        (eq? op 'list-ref)))
+        (eq? op 'list-ref)
+	(eq? op 'display)))
     #f))
 
 (define (if? x) (tagged-list? x 'if))

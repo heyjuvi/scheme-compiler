@@ -11,6 +11,9 @@
 (define (mad-car z) (z mad-true))
 (define (mad-cdr z) (z mad-false))
 
-(define mad-pair (mad-cons 2 3))
+(define mad-pair (mad-cons 23 42))
 
 (mad-cdr mad-pair)
+
+(display "12345678910111213141516")
+
