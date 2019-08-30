@@ -70,9 +70,10 @@
 (define (function? x) (tagged-list? x 'function))
 (define (function-name x) (cadr x))
 (define (function-args x) (caddr x))
-(define (function-body x) (cdddr x))
-(define (make-function name args body)
-  (cons 'function (cons name (cons args body))))
+(define (function-free-vars x) (cadddr x))
+(define (function-body x) (cddddr x))
+(define (make-function name args free-vars body)
+  (cons 'function (cons name (cons args (cons free-vars body)))))
 
 (define (function-name->ll-name x)
   (string-append "function_" x))

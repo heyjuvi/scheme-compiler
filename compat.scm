@@ -8,7 +8,7 @@
 (define (debug x) (if dbg-enabled (display x) 'no-debugging))
 (define (debug-newline) (if dbg-enabled (newline) 'no-debugging))
 
-(define (puts str) (if (not dbg-enabled) (print str) 'debugging))
+(define (puts str) (if (not (or dbg-enabled tests-enabled)) (print str) 'debugging))
 
 (define (shift-left x n) (arithmetic-shift x n))
 (define (shift-right x n) (arithmetic-shift x (* (-1) n)))
@@ -53,6 +53,8 @@
   (filter (lambda (z) (not (element? z y))) x))
 
 (define (extend-env var val env)
+  (debug "EXTEND-ENV var = ") (debug var) (debug-newline)
+  (debug "EXTEND-ENV val = ") (debug val) (debug-newline)
   (cons (cons var val) env))
 (define (extend-env-many vars vals env)
   (if (null? vars)
@@ -60,5 +62,5 @@
     (extend-env-many
       (cdr vars)
       (cdr vals)
-      (cons (cons (car vars) (car vals)) env))))
+      (extend-env (car vars) (car vals) env))))
 

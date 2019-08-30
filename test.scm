@@ -1,9 +1,16 @@
-(define (calc f n)
-  (if (equal? n 1)
-    1
-    (f n (calc f (- n 1)))))
+(define mad-true (lambda (consequence alternative) (consequence)))(define mad-false (lambda (consequence alternative) (alternative)))
 
-(define (add x y) (+ x y))
-(define (mul x y) (* x y))
+(define (mad-if boolean consequence alternative)
+  (boolean consequence alternative))
 
-(calc add 100000)
+(define (mad-cons x y)
+  (lambda (m)
+    (mad-if m
+      (lambda () x)
+      (lambda () y))))
+(define (mad-car z) (z mad-true))
+(define (mad-cdr z) (z mad-false))
+
+(define mad-pair (mad-cons 2 3))
+
+(mad-cdr mad-pair)

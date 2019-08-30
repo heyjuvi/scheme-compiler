@@ -19,6 +19,10 @@ int main(int argc, char** argv)
 	{
 		printf("()\n");
 	}
+	else
+	{
+		printf("%x\n", val);
+	}
 
 	return 0;
 }

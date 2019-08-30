@@ -106,14 +106,35 @@
 (define (emit-begin x var env)
   (emit-begin_ (reverse (begin-body x)) var env))
 
+(define (emit-c-env_ c-env-var free-vars n env)
+  (let ((tmp1 (unique-var))
+	(tmp2 (unique-var)))
+    (if (null? free-vars)
+      env
+      (begin
+	(emit-immediate n tmp1)
+        (puts (format "  ~A = call i64 @prim_list_ref(i64 ~A, i64 ~A)" tmp2 c-env-var tmp1))
+	(extend-env (car free-vars)
+		    tmp2
+		    (emit-c-env_ c-env-var
+			         (cdr free-vars)
+				 (add1 n)
+				 env))))))
+(define (emit-c-env c-env-var free-vars env)
+  (emit-c-env_ c-env-var free-vars 0 env))
+
 (define (emit-function x env)
   (let* ((name (function-name->ll-name (function-name x)))
          (args (function-args x))
-	 (vars (map (lambda (a) (unique-var)) args)))
+	 (f-free-vars (function-free-vars x))
+	 (vars (map (lambda (a) (unique-var)) args))
+	 (ext-env_ (extend-env-many args vars env)))
     (puts (format "define i64 @~A(~A) {" name (args-string vars)))
-    (emit-expr (function-body x) "%res" (extend-env-many args vars env))
-    (emit-return "%res")
-    (puts "}")))
+    ; c-env is always the first arg
+    (let ((ext-env (emit-c-env (car vars) f-free-vars ext-env_)))
+      (emit-expr (function-body x) "%res" ext-env)
+      (emit-return "%res")
+      (puts "}"))))
 
 (define (emit-global-var global-var)
   (puts (format "~A = global i64 0, align 8" global-var)))
@@ -194,6 +215,8 @@
 
 (define (emit-expr x var env)
   (debug "EMIT-EXPR -- x = ") (debug x) (debug-newline)
+  (debug "EMIT-EXPR -- var = ") (debug x) (debug-newline)
+  (debug "EMIT-EXPR -- env = ") (debug x) (debug-newline)
   (cond
     ((immediate? x)
      (emit-immediate x var))
