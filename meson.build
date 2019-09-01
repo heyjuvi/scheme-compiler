@@ -1,9 +1,20 @@
-project('lispy', 'c')
+project('slang', 'c')
 
 source_combiner = find_program('cat')
 scheme_compiler = find_program('chicken')
+c_compiler = find_program('clang')
+llvm_ir_compiler = find_program('llc')
 
-source_files = [ 'compat.scm', 'parser.scm', 'forms.scm', 'll.scm', 'preprocess.scm', 'data-types.scm', 'closure-conversion.scm', 'codegen.scm' ]
+source_files = files([
+  'compat.scm',
+  'parser.scm',
+  'forms.scm',
+  'll.scm',
+  'preprocess.scm',
+  'data-types.scm',
+  'closure-conversion.scm',
+  'codegen.scm'
+])
 combined_source_file = 'combined.scm'
 c_source_file = 'combined.c'
 
@@ -20,8 +31,9 @@ c_source = custom_target('c',
 
 chicken_lib = meson.get_compiler('c').find_library('chicken')
 
-executable('sc',
+slang_compiler = executable('slang',
   c_source,
   dependencies : chicken_lib,
   include_directories : '/usr/include/chicken/')
 
+subdir('tests')

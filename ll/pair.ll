@@ -1,3 +1,6 @@
+; structure of pair:
+; i64 %x | i64 %y
+
 define i64 @prim_pair_cons(i64 %x, i64 %y) {
 	; store the elements on the heap
 	%pair_addr = call i64 @___reserved_heap_store_i64(i64 %x)

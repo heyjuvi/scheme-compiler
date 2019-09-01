@@ -15,20 +15,33 @@
 ; closure: 110b
 ;
 
+; basic libc functions
 declare i8* @calloc(i32, i32)
 declare void @free(i8*)
 
 declare i64 @puts(i8*);
+declare i64 @putchar(i8);
+declare i64 @snprintf(i8*, i64, i8*, ...);
 
+; basic heap management
 @heap_base_ptr = global i8* zeroinitializer, align 8
 @heap_index = global i64 0, align 8
 
+; basic data type management
 @prim_bool_true = global i64 159
 @prim_bool_false = global i64 31
+@prim_bool_mask = global i64 127
+@prim_bool_tag = global i64 31
 
 @prim_pair_empty_list = global i64 47
+@prim_pair_empty_list_mask = global i64 255
+
+@prim_fixnum_tag = global i64 0
+@prim_fixnum_shift = global i64 2
+@prim_fixnum_mask = global i64 3
 
 @prim_heap_shift = global i64 3
+@prim_heap_mask = global i64 7
 
 @prim_pair_tag = global i64 1
 @prim_vector_tag = global i64 2

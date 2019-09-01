@@ -1,4 +1,4 @@
-(define in-port (open-input-file "../test.scm"))
+(define in-port #f)
 
 (define current-char #f)
 (define (next-char)
@@ -71,7 +71,9 @@
           (else
             (error "Illegal token start detected -- READ-TOKEN" first-char)))))
 
-(define (parse)
+(define (parse in-file)
+  (set! in-port (open-input-file in-file))
+  (next-char)
   (parse-real '()))
 
 (define (parse-real collector)
@@ -291,7 +293,5 @@
           (display x)
           (newline))))
     ast))
-
-(next-char)
 
 

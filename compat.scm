@@ -3,12 +3,11 @@
 (import srfi-1)
 
 (define dbg-enabled #f)
-(define tests-enabled #f)
 
 (define (debug x) (if dbg-enabled (display x) 'no-debugging))
 (define (debug-newline) (if dbg-enabled (newline) 'no-debugging))
 
-(define (puts str) (if (not (or dbg-enabled tests-enabled)) (print str) 'debugging))
+(define (puts str) (if (not dbg-enabled) (print str) 'debugging))
 
 (define (shift-left x n) (arithmetic-shift x n))
 (define (shift-right x n) (arithmetic-shift x (* (-1) n)))

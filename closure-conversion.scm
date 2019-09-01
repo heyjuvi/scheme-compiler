@@ -90,15 +90,3 @@
 	                    free)))
     (free-vars->env-refs_ x reps)))
 
-
-(if tests-enabled
-  (let ((test '(define (foo f)
-                 (lambda (x)
-                   (lambda (y)
-                     (f (+ x y)))))))
-    (display (lambdas->closures test)) (newline) (newline)
-    (for-each
-      (lambda (x)
-        (display x) (newline))
-      functions))
-  'ok)

@@ -1,3 +1,8 @@
+; structure of closure:
+; i64 %func_addr | i64 %env
+; (env is a list of the values of the free variables inside
+; the closure)
+
 define i64 @prim_closure(i64 %func_addr, i64 %env) {
 	; store the function address on the heap
 	%closure_addr = call i64 @___reserved_heap_store_i64(i64 %func_addr)
