@@ -1,7 +1,3 @@
-(import chicken.process-context)
-(import chicken.format)
-(import srfi-1)
-
 (define (emit-immediate x var)
   (emit-copy var (fixnum->string (immediate-rep x))))
 

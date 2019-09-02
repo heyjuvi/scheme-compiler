@@ -1,5 +1,3 @@
-(import srfi-13)
-
 (define (tagged-list? x tag)
   (if (and (list? x) (not (null? x)))
     (eq? (car x) tag)

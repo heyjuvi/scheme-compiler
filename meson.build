@@ -6,7 +6,9 @@ c_compiler = find_program('clang')
 llvm_ir_compiler = find_program('llc')
 
 source_files = files([
-  'compat.scm',
+  'imports.scm',
+  'compat-chicken.scm',
+  'misc.scm',
   'parser.scm',
   'forms.scm',
   'll.scm',

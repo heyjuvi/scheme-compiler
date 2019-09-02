@@ -16,12 +16,20 @@
   (equal? (string-append "appending strings" " works")
 	  "appending strings works"))
 
-(display (string-append "appending strings" " works"))
-(display "String are correctly appended?")
+(display "Strings are correctly appended?")
 (display appending-strings-works)
+(newline)
+
+(define appending-strings-still-works
+  (equal? (string-append "appending strings" " still works")
+	  "appending strings still works"))
+
+(display "Strings are still correctly appended? (the heap is intact)")
+(display appending-strings-still-works)
 (newline)
 
 (and (and strings-are-equal
 	  strings-are-not-equal)
-     appending-strings-works)
+     (and appending-strings-works
+	  appending-strings-still-works))
 

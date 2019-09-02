@@ -1,5 +1,3 @@
-(import chicken.bitwise)
-
 ; immediate types
 
 (define fixnum-shift 2)

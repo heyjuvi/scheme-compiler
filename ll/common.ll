@@ -123,9 +123,14 @@ define i64 @___reserved_heap_align() {
 }
 
 define i64 @___reserved_heap_store_i8_array(i8* %array_ptr) {
-	%new_array_addr = call i64 @___reserved_heap_store_i8(i8 0)
-	%new_array_ptr = inttoptr i64 %new_array_addr to i64*
-	%new_array_i8_ptr = bitcast i64* %new_array_ptr to i8*
+	; get the globals for the heap
+	%base_ptr = load i8*, i8** @heap_base_ptr
+	%index = load i64, i64* @heap_index
+	; construct the current pointer and the integer
+	; to be returned from it
+	%new_array_i8_ptr = getelementptr i8, i8* %base_ptr, i64 %index
+	%new_array_i64_ptr = bitcast i8* %new_array_i8_ptr to i64*
+	%new_array_addr = ptrtoint i64* %new_array_i64_ptr to i64
 	%counter_ptr = alloca i64, align 8
 	store i64 0, i64* %counter_ptr
 	br label %copy_array_loop
@@ -140,8 +145,9 @@ copy_array_loop:
 copy_byte:
 	%dest_ptr = getelementptr i8, i8* %new_array_i8_ptr, i64 %counter
 	store i8 %byte, i8* %dest_ptr
-	call i64 @___reserved_heap_store_i8(i8 0)
 	br label %copy_array_loop
 return_addr:
+	%new_index = add i64 %index, %counter
+	store i64 %new_index, i64* @heap_index
 	ret i64 %new_array_addr
 }

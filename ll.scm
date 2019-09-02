@@ -1,5 +1,3 @@
-(import chicken.format)
-
 (define label-counter 0)
 (define (unique-label str)
   (set! label-counter (add1 label-counter))
