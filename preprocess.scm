@@ -2,7 +2,7 @@
   (cond
     ((let? x)
      (make-let (let-bindings x)
-	       (preprocess (make-begin (let-body x)))))
+	       (make-body (preprocess (make-begin (let-body x))))))
     ((if? x)
      (make-if (preprocess (if-test x))
 	      (preprocess (if-conseq x))
@@ -18,7 +18,7 @@
 						   (make-body (make-begin (define-body x))))))))
        ((define-var? x)
 	(make-define-var (define-id x)
-			 (preprocess (define-body x))))
+			 (make-body (preprocess (car (define-body x))))))
        (else
 	 (error "define could not be preprocessed: " x))))
     ; TODO: to be changed, such that all expression types

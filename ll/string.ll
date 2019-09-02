@@ -7,6 +7,65 @@
 @prim_bool_true_string = private constant [3 x i8] c"#t\00", align 8
 @prim_bool_false_string = private constant [3 x i8] c"#f\00", align 8
 
+define i64 @prim_string_length(i64 %string) {
+	; remove the tag
+        %string_tag = load i64, i64* @prim_string_tag
+        %string_addr = xor i64 %string, %string_tag
+	; make a pointer from it
+	%string_ptr = inttoptr i64 %string_addr to i64*
+	%string_i8_ptr = bitcast i64* %string_ptr to i8*
+	; call strlen
+	%length = call i64 @strlen(i8* %string_i8_ptr);
+	; set the fixnum tag
+        %fixnum_tag = load i64, i64* @prim_fixnum_tag
+        %tagged_length = or i64 %length, %fixnum_tag
+	; return the length
+	ret i64 %tagged_length
+}
+
+define i64 @prim_string_equal(i64 %string1, i64 %string2) {
+	; remove the tags
+        %string_tag = load i64, i64* @prim_string_tag
+        %string1_addr = xor i64 %string1, %string_tag
+        %string2_addr = xor i64 %string2, %string_tag
+	; make pointers from it
+	%string1_ptr = inttoptr i64 %string1_addr to i64*
+	%string2_ptr = inttoptr i64 %string2_addr to i64*
+	%string1_i8_ptr = bitcast i64* %string1_ptr to i8*
+	%string2_i8_ptr = bitcast i64* %string2_ptr to i8*
+	; call strcmp
+	%strcmp_equal = call i64 @strcmp(i8* %string1_i8_ptr, i8* %string2_i8_ptr)
+	%test_equal = icmp eq i64 %strcmp_equal, 0
+	br i1 %test_equal, label %equal, label %not_equal
+equal:
+	%res_equal = load i64, i64* @prim_bool_true
+	ret i64 %res_equal
+not_equal:
+	%res_not_equal = load i64, i64* @prim_bool_false
+	ret i64 %res_not_equal
+}
+
+define i64 @prim_string_append(i64 %string1, i64 %string2) {
+	; remove the tags
+        %string_tag = load i64, i64* @prim_string_tag
+        %string1_addr = xor i64 %string1, %string_tag
+        %string2_addr = xor i64 %string2, %string_tag
+	; make pointers from it
+	%string1_ptr = inttoptr i64 %string1_addr to i64*
+	%string2_ptr = inttoptr i64 %string2_addr to i64*
+	%string1_i8_ptr = bitcast i64* %string1_ptr to i8*
+	%string2_i8_ptr = bitcast i64* %string2_ptr to i8*
+	; make a new string
+	%new_string_addr = call i64 @___reserved_heap_store_i8_array(i8* %string1_i8_ptr)
+	call i64 @___reserved_heap_store_i8_array(i8* %string2_i8_ptr)
+	call i64 @___reserved_heap_store_i8(i8 0)
+	call i64 @___reserved_heap_align()
+	; set the string tag
+        %tagged_new_string_addr = or i64 %new_string_addr, %string_tag
+	; return the freshly created string
+	ret i64 %tagged_new_string_addr
+}
+
 define i64 @prim_fixnum_to_string(i64 %x) {
 	; setup enough heap storage for the string
 	%string_addr = call i64 @___reserved_heap_store_i64(i64 0)

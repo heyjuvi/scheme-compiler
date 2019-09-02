@@ -30,6 +30,7 @@
         (eq? op 'equal?)
         (eq? op 'and)
         (eq? op 'or)
+        (eq? op 'not)
         (eq? op 'cons)
         (eq? op 'car)
         (eq? op 'cdr)

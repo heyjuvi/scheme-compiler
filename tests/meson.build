@@ -5,13 +5,16 @@ std_source_files = files([
   '../ll/pair.ll',
   '../ll/vector.ll',
   '../ll/closure.ll',
-  '../ll/string.ll'
+  '../ll/string.ll',
+  '../ll/generic.ll'
 ])
 
 tests = [
   [ 'Test of the vector primitive data type', 'vector.scm' ],
   [ 'Test of the closure primitive data type', 'closure.scm' ],
   [ 'Test of the string primitive data type', 'string.scm' ],
+  [ 'Test of the begin expression behaviour', 'begin.scm' ],
+  [ 'Test of the let expression behaviour', 'let.scm' ],
 ]
 
 driver_source_file = 'driver.c'

@@ -41,12 +41,13 @@
        (emit-expr (primcall-operand1 x) tmp1 env)
        (emit-expr (primcall-operand2 x) tmp2 env)
        (emit-call2 "prim_bool_or" tmp1 tmp2 var))
+      ((eq? op 'not)
+       (emit-expr (primcall-operand1 x) tmp1 env)
+       (emit-call1 "prim_bool_not" tmp1 var))
       ((eq? op 'equal?)
-       ; needs to be generalized (in ir) to other
-       ; types
        (emit-expr (primcall-operand1 x) tmp1 env)
        (emit-expr (primcall-operand2 x) tmp2 env)
-       (emit-call2 "prim_fixnum_equal" tmp1 tmp2 var))
+       (emit-call2 "prim_generic_equal" tmp1 tmp2 var))
       ((eq? op 'cons)
        (emit-expr (primcall-operand1 x) tmp1 env)
        (emit-expr (primcall-operand2 x) tmp2 env)
@@ -142,8 +143,8 @@
   (debug (car body)) (debug-newline) (debug-newline)
   (if (not (null? body))
     (begin
-      (emit-begin_ (cdr body) (unique-var) env)
-      (emit-expr (car body) var env))))
+      (emit-expr (car body) var env))
+      (emit-begin_ (cdr body) (unique-var) env)))
 (define (emit-begin x var env)
   (emit-begin_ (reverse (begin-body x)) var env))
 
