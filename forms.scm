@@ -37,6 +37,8 @@
 	(eq? op 'vector-init)
 	(eq? op 'vector-ref)
 	(eq? op 'vector-set!)
+	(eq? op 'string-length)
+	(eq? op 'string-append)
         (eq? op 'fixnum->string)
         (eq? op 'any->string)
         (eq? op 'list-ref)
