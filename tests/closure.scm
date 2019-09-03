@@ -22,4 +22,17 @@
 (display has-correct-values)
 (newline)
 
-has-correct-values
+(define display-inside-lambda
+  (lambda ()
+    (display "Does it compile?")
+    #f
+    #t))
+(define display-inside-lambda-works
+  (display-inside-lambda))
+
+(display "Display call inside a lambda works?")
+(display display-inside-lambda-works)
+(newline)
+
+(and has-correct-values
+     display-inside-lambda)

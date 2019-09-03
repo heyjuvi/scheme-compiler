@@ -83,7 +83,7 @@
 (define (function-name x) (cadr x))
 (define (function-args x) (caddr x))
 (define (function-free-vars x) (cadddr x))
-(define (function-body x) (cddddr x))
+(define (function-body x) (caddddr x))
 (define (make-function name args free-vars body)
   (cons 'function (cons name (cons args (cons free-vars body)))))
 

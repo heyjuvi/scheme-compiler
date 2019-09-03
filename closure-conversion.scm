@@ -32,10 +32,14 @@
 	       (name (unique-lambda-name))
 	       (free (free-vars x)))
 	   (let* ((function-args (cons 'c_env (lambda-args x)))
-		  (converted-body (lambdas->closures (lambda-body x)))
+		  ; the body should be wrapped by begin at this stage
+		  (converted-body (lambdas->closures (car (lambda-body x))))
 		  ; maybe unnecessary because of c-env unpacking?
 		  (substituted-body (free-vars->env-refs converted-body free)))
-             (add-function (make-function name function-args free (make-begin substituted-body))))
+             (add-function (make-function name
+					  function-args
+					  free
+					  (make-body substituted-body))))
 	   (make-closure name arity free)))
 	((list? x) (map lambdas->closures x))
 	((immediate? x) x)
@@ -46,19 +50,23 @@
 (define (free-vars x)
   (debug "FREE-VARS -- x = ") (debug x) (debug-newline)
   (cond
-    ((lambda? x)
-     (set-substract (free-vars (lambda-body x))
-		    (lambda-args x)))
     ((closure? x) (closure-free-vars x))
+    ((lambda? x)
+     ; the body should be wrapped by begin at this stage
+     (set-substract (free-vars (car (lambda-body x)))
+		    (lambda-args x)))
     ((if? x)
      (set-union (free-vars (if-test x))
 		(set-union (free-vars (if-conseq x))
 			   (free-vars (if-altern x)))))
+    ((begin? x)
+     (free-vars (begin-body x)))
     ((let? x)
      (set-union (set-union-many (map free-vars (let-bindings-vals x)))
 		(set-substract (free-vars (let-body x))
                                (let-bindings-vars x))))
     ((immediate? x) '())
+    ((string? x) '())
     ((quote? x) '())
     ((null? x) '())
     ((primcall? x) (set-union-many (map free-vars (cdr x))))
@@ -76,6 +84,7 @@
          (cdr var-rep))))
     ; TODO: let
     ((immediate? x) x)
+    ((string? x) x)
     ((quote? x) x)
     ((null? x) x)
     ((closure? x) x)

@@ -9,3 +9,4 @@
 
 (define (bool->fixnum x) (if x 1 0))
 
+(define (caddddr x) (list-ref x 4))
