@@ -6,6 +6,7 @@ std_source_files = files([
   '../ll/vector.ll',
   '../ll/closure.ll',
   '../ll/string.ll',
+  '../ll/symbol.ll',
   '../ll/generic.ll'
 ])
 

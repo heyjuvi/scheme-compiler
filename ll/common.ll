@@ -29,6 +29,10 @@ declare i64 @snprintf(i8*, i64, i8*, ...);
 @heap_base_ptr = global i8* zeroinitializer, align 8
 @heap_index = global i64 0, align 8
 
+; basic symbol management
+@symbols_base_ptr = global i8* zeroinitializer, align 8
+@symbols_index = global i64 0, align 8
+
 ; basic data type management
 @prim_bool_true = global i64 159
 @prim_bool_false = global i64 31
