@@ -59,6 +59,9 @@ define i64 @___reserved_main() {
 	; allocate the heap and store its pointer
 	%heap_ptr = call i8* @calloc(i32 10000, i32 8)
 	store i8* %heap_ptr, i8** @heap_base_ptr, align 8
+	; allocate the symbols and store its pointer
+	%symbols_ptr = call i8* @calloc(i32 1000, i32 8)
+	store i8* %symbols_ptr, i8** @symbols_base_ptr, align 8
 	; call the main program
 	%res = call i64 @scheme_main()
 	; free the heap
@@ -108,17 +111,17 @@ define i64 @___reserved_heap_store_i8(i8 %value) {
 	ret i64 %int_addr
 }
 
-define i64 @___reserved_heap_align() {
+define i64 @___reserved_align(i8** %base_ptrptr, i64* %index_ptr) {
 	; get the globals for the heap
-	%base_ptr = load i8*, i8** @heap_base_ptr
-	%index = load i64, i64* @heap_index
+	%base_ptr = load i8*, i8** %base_ptrptr
+	%index = load i64, i64* %index_ptr
 	; compute and store the next aligned index
 	%heap_mask = load i64, i64* @prim_heap_mask
 	%misalignment = and i64 %index, %heap_mask
 	%diff = sub i64 %heap_mask, %misalignment
 	%fill = add i64 %diff, 1
 	%next_index = add i64 %index, %fill
-	store i64 %next_index, i64* @heap_index
+	store i64 %next_index, i64* %index_ptr
 	; return the next aligned address
 	%i8_ptr = getelementptr i8, i8* %base_ptr, i64 %next_index
 	%i64_ptr = bitcast i8* %i8_ptr to i64*
@@ -126,12 +129,21 @@ define i64 @___reserved_heap_align() {
 	ret i64 %int_addr
 }
 
-define i64 @___reserved_heap_store_i8_array(i8* %array_ptr) {
-	; get the globals for the heap
-	%base_ptr = load i8*, i8** @heap_base_ptr
-	%index = load i64, i64* @heap_index
+define i64 @___reserved_heap_align() {
+	%res = call i64 @___reserved_align(i8** @heap_base_ptr, i64* @heap_index)
+	ret i64 %res
+}
+
+define i64 @___reserved_symbols_align() {
+	%res = call i64 @___reserved_align(i8** @symbols_base_ptr, i64* @symbols_index)
+	ret i64 %res
+}
+
+define i64 @___reserved_store_i8_array(i8** %base_ptrptr, i64* %index_ptr, i8* %array_ptr) {
 	; construct the current pointer and the integer
 	; to be returned from it
+	%base_ptr = load i8*, i8** %base_ptrptr
+	%index = load i64, i64* %index_ptr
 	%new_array_i8_ptr = getelementptr i8, i8* %base_ptr, i64 %index
 	%new_array_i64_ptr = bitcast i8* %new_array_i8_ptr to i64*
 	%new_array_addr = ptrtoint i64* %new_array_i64_ptr to i64
@@ -152,6 +164,63 @@ copy_byte:
 	br label %copy_array_loop
 return_addr:
 	%new_index = add i64 %index, %counter
-	store i64 %new_index, i64* @heap_index
+	store i64 %new_index, i64* %index_ptr
 	ret i64 %new_array_addr
 }
+
+define i64 @___reserved_heap_store_i8_array(i8* %array_ptr) {
+	; store the array
+	%new_array_addr = call i64 @___reserved_store_i8_array(i8** @heap_base_ptr, i64* @heap_index, i8* %array_ptr)
+	ret i64 %new_array_addr
+}
+
+define i64 @___reserved_symbols_store_i8_array(i8* %array_ptr) {
+	; store the array
+	%new_array_addr = call i64 @___reserved_store_i8_array(i8** @symbols_base_ptr, i64* @symbols_index, i8* %array_ptr)
+	ret i64 %new_array_addr
+}
+
+; TODO: this is not aligned :/
+define i64 @___reserved_symbols_create(i8* %array_ptr) {
+	; load the symbol tag and the heap mask
+	%symbol_tag = load i64, i64* @prim_symbol_tag
+	%heap_mask = load i64, i64* @prim_heap_mask
+	; look for the symbol within the current symbols
+	%base_ptr = load i8*, i8** @symbols_base_ptr
+	%index = load i64, i64* @symbols_index
+	%counter_ptr = alloca i64, align 8
+	store i64 0, i64* %counter_ptr
+	br label %find_symbol_loop
+find_symbol_loop:
+	%counter = load i64, i64* %counter_ptr
+	%symbol_ptr = getelementptr i8, i8* %base_ptr, i64 %counter
+	%symbol_len = call i64 @strlen(i8* %symbol_ptr)
+	%tmp_counter = add i64 %counter, %symbol_len
+	%new_counter = add i64 %tmp_counter, 1
+	%tmp = and i64 %new_counter, %heap_mask
+	%diff = sub i64 %new_counter, %tmp
+	%tmp_new_counter_aligned = add i64 %new_counter, %diff
+	%new_counter_aligned = add i64 %tmp_new_counter_aligned, 1
+	store i64 %new_counter_aligned, i64* %counter_ptr
+	%strcmp_equal = call i64 @strcmp(i8* %symbol_ptr, i8* %array_ptr)
+	%test_equal = icmp eq i64 %strcmp_equal, 0
+	br i1 %test_equal, label %symbol_present, label %symbol_not_yet_found
+symbol_not_yet_found:
+	%next_symbol_ptr = getelementptr i8, i8* %base_ptr, i64 %new_counter_aligned
+	%next_symbol_first = load i8, i8* %next_symbol_ptr
+	%test_zero = icmp eq i8 %next_symbol_first, 0
+	br i1 %test_zero, label %symbol_not_present, label %find_symbol_loop
+symbol_present:
+	; if the symbol is already present, just return its address
+	%symbol_i64_ptr = bitcast i8* %symbol_ptr to i64*
+	%symbol_addr = ptrtoint i64* %symbol_i64_ptr to i64
+	%tagged_symbol_addr = or i64 %symbol_addr, %symbol_tag
+	ret i64 %tagged_symbol_addr
+symbol_not_present:
+	; otherwise store the symbol's string and return the address
+	%new_symbol_addr = call i64 @___reserved_symbols_store_i8_array(i8* %array_ptr)
+	call i64 @___reserved_symbols_align()
+	%tagged_new_symbol_addr = or i64 %new_symbol_addr, %symbol_tag
+	ret i64 %tagged_new_symbol_addr
+}
+

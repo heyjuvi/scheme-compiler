@@ -126,7 +126,8 @@
 (define (make-ll-global-var str) (string-append "@" str))
 
 (define (quote? x) (tagged-list? x 'quote))
-(define (quote-content x) (cdr x))
+(define (quote-content x) (cadr x))
+(define (make-quote content) (list 'quote content))
 
 (define (quasiquote? x) (tagged-list? x 'quasiquote))
 (define (unquote? x) (tagged-list? x 'unquote))

@@ -41,6 +41,8 @@
 					  free
 					  (make-body substituted-body))))
 	   (make-closure name arity free)))
+	((quote? x)
+	 (make-quote (lambdas->closures (quote-content x))))
 	((list? x) (map lambdas->closures x))
 	((immediate? x) x)
 	((var? x) x)

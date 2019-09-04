@@ -1,35 +1,33 @@
-(define strings-are-equal
-  (equal? "strings are equal" "strings are equal"))
+(define symbols-are-equal
+  (equal? 'some-symbol 'some-symbol))
 
-(display "String equality works?")
-(display strings-are-equal)
+(display "Symbol equality works?")
+(display symbols-are-equal)
 (newline)
 
-(define strings-are-not-equal
-  (not (equal? "strings are not equal" "strings are equal")))
+(define symbols-are-not-equal
+  (not (equal? 'some-symbol 'some-other-symbol)))
 
-(display "String inequality works?")
-(display strings-are-not-equal)
+(display "Symbol inequality works?")
+(display symbols-are-not-equal)
 (newline)
 
-(define appending-strings-works
-  (equal? (string-append "appending strings" " works")
-	  "appending strings works"))
+(define quoted-lists-are-equal
+  (equal? '(a b c) (list 'a 'b 'c)))
 
-(display "Strings are correctly appended?")
-(display appending-strings-works)
+(display "Quoted lists equality works?")
+(display quoted-lists-are-equal)
 (newline)
 
-(define appending-strings-still-works
-  (equal? (string-append "appending strings" " still works")
-	  "appending strings still works"))
+(define quoted-lists-are-not-equal
+  (equal? '(a b c) '(a b c d)))
 
-(display "Strings are still correctly appended? (the heap is intact)")
-(display appending-strings-still-works)
+(display "Quoted lists nequality works?")
+(display quoted-lists-are-not-equal)
 (newline)
 
-(and (and strings-are-equal
-	  strings-are-not-equal)
-     (and appending-strings-works
-	  appending-strings-still-works))
+(and (and symbols-are-equal
+          symbols-are-not-equal)
+     (and quoted-lists-are-equal
+	  quoted-lists-are-not-equal))
 

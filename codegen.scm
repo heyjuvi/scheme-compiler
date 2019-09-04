@@ -239,12 +239,18 @@
     (puts (format "  ~A = load i64, i64* @prim_string_tag" tmp2))
     (puts (format "  ~A = or i64 ~A, ~A" var tmp1 tmp2))))
 
-; TODO: store quoted content
+(define (emit-symbol x var env)
+  (let ((tmp1 (unique-var)))
+    (emit-string (symbol->string x) tmp1 env)
+    (emit-call1 "prim_string_to_symbol" tmp1 var)))
+
 (define (emit-quote x var env)
   (let ((content (quote-content x)))
     (if (null? content)
       (emit-immediate '() var)
-      #f)))
+      ; we simply emit a symbol, preprocessing has eliminated
+      ; all deeper levels of quotation (this is still to do)
+      (emit-symbol content var env))))
 
 (define (emit-application x var env)
   (let* ((evaluated-list

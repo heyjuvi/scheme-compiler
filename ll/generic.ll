@@ -23,10 +23,19 @@ test_string:
 	%string_mask = load i64, i64* @prim_heap_mask
 	%a_string_tag = and i64 %a, %string_mask
 	%string_test = icmp eq i64 %a_string_tag, %string_tag
-	br i1 %string_test, label %check_string_equality, label %error
+	br i1 %string_test, label %check_string_equality, label %test_symbol
 check_string_equality:
 	%string_equal = call i64 @prim_string_equal(i64 %a, i64 %b)
 	ret i64 %string_equal
+test_symbol:
+	%symbol_tag = load i64, i64* @prim_symbol_tag
+	%symbol_mask = load i64, i64* @prim_heap_mask
+	%a_symbol_tag = and i64 %a, %symbol_mask
+	%symbol_test = icmp eq i64 %a_symbol_tag, %symbol_tag
+	br i1 %symbol_test, label %check_symbol_equality, label %error
+check_symbol_equality:
+	%symbol_equal = call i64 @prim_symbol_equal(i64 %a, i64 %b)
+	ret i64 %symbol_equal
 error:
 	%res_false = load i64, i64* @prim_bool_false
 	ret i64 %res_false

@@ -35,4 +35,4 @@
 (newline)
 
 (and has-correct-values
-     display-inside-lambda)
+     display-inside-lambda-works)

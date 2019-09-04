@@ -119,11 +119,11 @@
     (cond ((left-parenthesis? next-token)
            (parse-list '()))
           ((quoted? next-token)
-           (cons 'quote (parse-expr)))
+           (list 'quote (parse-expr)))
           ((quasi-quoted? next-token)
-           (cons 'quasi-quote (parse-expr)))
+           (list 'quasi-quote (parse-expr)))
           ((unquoted? next-token)
-           (cons 'unquote (parse-expr)))
+           (list 'unquote (parse-expr)))
           ((boolean-token? next-token)
            (cadr next-token))
           ((named-character-token? next-token)
@@ -147,15 +147,15 @@
            (reverse collector))
           ((quoted? next-token)
            (parse-list
-             (cons (cons 'quote (parse-expr))
+             (cons (list 'quote (parse-expr))
                    collector)))
           ((quasi-quoted? next-token)
            (parse-list
-             (cons (cons 'quasi-quote (parse-expr))
+             (cons (list 'quasi-quote (parse-expr))
                    collector)))
           ((unquoted? next-token)
            (parse-list
-             (cons (cons 'unquote (parse-expr))
+             (cons (list 'unquote (parse-expr))
                    collector)))
           ((boolean-token? next-token)
            (parse-list
