@@ -38,6 +38,20 @@ define i64 @prim_pair_cdr(i64 %pair) {
 	ret i64 %cdr
 }
 
+define i64 @prim_pair_equal(i64 %x, i64 %y) {
+	; get the cars and cdrs
+	%x_car = call i64 @prim_pair_car(i64 %x)
+	%x_cdr = call i64 @prim_pair_cdr(i64 %x)
+	%y_car = call i64 @prim_pair_car(i64 %y)
+	%y_cdr = call i64 @prim_pair_cdr(i64 %y)
+	; check if the cars are equal and the cdrs are equal
+	%cars_equal = call i64 @prim_generic_equal(i64 %x_car, i64 %y_car)
+	%cdrs_equal = call i64 @prim_generic_equal(i64 %x_cdr, i64 %y_cdr)
+	%both_equal = call i64 @prim_bool_equal(i64 %cars_equal, i64 %cdrs_equal)
+	; return the result
+	ret i64 %both_equal
+}
+
 define i64 @prim_list_ref(i64 %start_pair, i64 %tagged_index) {
 	; get the value for empty list
 	%empty_list = load i64, i64* @prim_pair_empty_list

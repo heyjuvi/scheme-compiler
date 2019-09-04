@@ -11,6 +11,8 @@
     ((null? x) #t)
     (else #f)))
 
+(define (list-primcall? x) (tagged-list? x 'list))
+
 (define (primcall-operator x) (car x))
 (define (primcall-operand1 x) (cadr x))
 (define (primcall-operand2 x) (caddr x))
