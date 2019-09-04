@@ -34,5 +34,13 @@
 (display display-inside-lambda-works)
 (newline)
 
-(and has-correct-values
-     display-inside-lambda-works)
+(define inline-lambda-works
+  (equal? ((lambda (x) (+ x 2)) 2) 4))
+
+(display "Inline lambda works?")
+(display inline-lambda-works)
+(newline)
+
+(and (and has-correct-values
+          display-inside-lambda-works)
+     inline-lambda-works)
