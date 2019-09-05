@@ -20,6 +20,13 @@ test_bool:
 check_bool_equality:
 	%bool_equal = call i64 @prim_bool_equal(i64 %a, i64 %b)
 	ret i64 %bool_equal
+check_empty_list:
+	%empty_list = load i64, i64* @prim_bool_tag
+	%bool_mask = load i64, i64* @prim_bool_mask
+	%a_bool_tag = and i64 %a, %bool_mask
+	%bool_test = icmp eq i64 %a_bool_tag, %bool_tag
+	br i1 %bool_test, label %check_bool_equality, label %test_pair
+check_empty_list_equality:
 test_pair:
 	%pair_tag = load i64, i64* @prim_pair_tag
 	%pair_mask = load i64, i64* @prim_heap_mask

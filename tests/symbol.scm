@@ -27,14 +27,27 @@
 (newline)
 
 (define quasiquote-works
-  (equal? `(2 ,(+ 2 2)) '(2 2)))
+  (equal? `(2 ,(+ 2 2)) '(2 4)))
 
 (display "Quasiquote works?")
 (display quasiquote-works)
 (newline)
 
+(display (car (cdr `(2 ,(+ 2 2)))))
+(display (car (cdr '(2 4))))
+
+(define nested-quasiquote-works
+  (equal? `(`(+ 2 2) ,`(2 ,(+ 2 2)))
+	  '(`(+ 2 2) (2 4))))
+
+(display "Nested quasiquote works?")
+(display nested-quasiquote-works)
+(newline)
+
 (and (and symbols-are-equal
           symbols-are-not-equal)
-     (and quoted-lists-are-equal
-	  quoted-lists-are-not-equal))
+     (and (and quoted-lists-are-equal
+	       quoted-lists-are-not-equal)
+	  (and quasiquote-works
+	       nested-quasiquote-works)))
 

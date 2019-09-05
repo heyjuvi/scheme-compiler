@@ -33,7 +33,7 @@
     ((quote? x)
      (preprocess-quote (quote-content x)))
     ((quasiquote? x)
-     (preprocess-quasiquote 1 (quasiquote-content x)))
+     (map preprocess (preprocess-quasiquote 1 (quasiquote-content x))))
     ((list? x)
      (map preprocess x))
     ((var? x) x)
@@ -49,24 +49,34 @@
 
 (define (preprocess-quote content)
   (cond
-    ; recursively treat lists
-    ((pair? content)
-     `(cons ,(preprocess-quote (car content))
-            ,(preprocess-quote (cdr content))))
     ((immediate? content) content)
     ((string? content) content)
     ; make a quote from it again at leaf level, if we finally
     ; have found a symbol
     ((symbol? content) (make-quote content))
+    ; recursively treat lists
+    ((pair? content)
+     `(cons ,(preprocess-quote (car content))
+            ,(preprocess-quote (cdr content))))
     (else
       (error "Illegal value in quote: " content))))
 
+; TODO: unquote splicing (also in the parser)
 (define (preprocess-quasiquote n content)
   (cond
     ((unquote? content)
      (if (equal? n 1)
-       (preprocess (unquote-content content)))
-       
-    (else
-      (error "Illegal value in quasiquote: " content))))
+       (preprocess (unquote-content content))
+       (list 'list
+	     (make-quote 'unquote)
+	     (preprocess-quasiquote (sub1 n) (unquote-content content)))))
+    ((quasiquote? content)
+     (list 'list
+	   (make-quote 'quasiquote)
+	   (preprocess-quasiquote (add1 n) (quasiquote-content content))))
+    ((pair? content)
+     `(cons ,(preprocess-quasiquote n (car content))
+	    ,(preprocess-quasiquote n (cdr content))))
+    ; everything else can be handled by quote (immediate, string and symbol)
+    (else (preprocess-quote content))))
 
