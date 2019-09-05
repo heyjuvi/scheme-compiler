@@ -22,8 +22,15 @@
 (define quoted-lists-are-not-equal
   (equal? '(a b c) '(a b c d)))
 
-(display "Quoted lists nequality works?")
+(display "Quoted lists inequality works?")
 (display quoted-lists-are-not-equal)
+(newline)
+
+(define quasiquote-works
+  (equal? `(2 ,(+ 2 2)) '(2 2)))
+
+(display "Quasiquote works?")
+(display quasiquote-works)
 (newline)
 
 (and (and symbols-are-equal

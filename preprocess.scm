@@ -32,6 +32,8 @@
      (preprocess-list->cons (map preprocess (cdr x))))
     ((quote? x)
      (preprocess-quote (quote-content x)))
+    ((quasiquote? x)
+     (preprocess-quasiquote 1 (quasiquote-content x)))
     ((list? x)
      (map preprocess x))
     ((var? x) x)
@@ -58,3 +60,13 @@
     ((symbol? content) (make-quote content))
     (else
       (error "Illegal value in quote: " content))))
+
+(define (preprocess-quasiquote n content)
+  (cond
+    ((unquote? content)
+     (if (equal? n 1)
+       (preprocess (unquote-content content)))
+       
+    (else
+      (error "Illegal value in quasiquote: " content))))
+

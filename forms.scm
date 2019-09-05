@@ -132,7 +132,12 @@
 (define (make-quote content) (list 'quote content))
 
 (define (quasiquote? x) (tagged-list? x 'quasiquote))
+(define (quasiquote-content x) (cadr x))
+(define (make-quasiquote content) (list 'quasiquote content))
+
 (define (unquote? x) (tagged-list? x 'unquote))
+(define (unquote-content x) (cadr x))
+(define (make-unquote content) (list 'unquote content))
 
 (define (set!? x) (tagged-list? x 'set!))
 (define (set!-id x) (cadr x))
