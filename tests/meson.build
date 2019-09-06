@@ -33,17 +33,21 @@ foreach test_data : tests
   test_source_filename = test_data[1]
 
   test_ll_source = custom_target(test_source_filename + '_ll-target',
-    output : '@BASENAME@.ll',
+    output : test_source_filename + '.ll',
     input : test_source_filename,
     command : [ slang_compiler, '@INPUT@' ],
     capture : true)
   combined_test_ll_source = custom_target(test_source_filename + '_combined_test_ll-target',
-    output : '@BASENAME@_combined.ll',
-    input : test_ll_source,
-    command : [ source_combiner, std_source_files, '@INPUT@' ],
+    output : test_source_filename + '.combined.ll',
+    input : std_source_files + [ test_ll_source ],
+    command : [ source_combiner, '@INPUT@' ],
     capture : true)
+  combined_test_ll_object = custom_target(test_source_filename + '_combined_test_object-target',
+    output : test_source_filename + '.o',
+    input : combined_test_ll_source,
+    command : [ llvm_ir_compiler, '@INPUT@', '--filetype=obj', '-o', '@OUTPUT@' ])
   test_executable = executable(test_source_filename + '.elf',
-    sources : [ 'driver.c', combined_test_ll_source ],
+    sources : [ combined_test_ll_object, driver_object ],
     c_args : [ '-m64', '-g' ],
     link_args : [ '-no-pie' ])
   test(test_description, test_executable)
