@@ -93,10 +93,10 @@ define i64 @___reserved_heap_store_i64(i64 %value) {
 	ret i64 %int_addr
 }
 
-define i64 @___reserved_heap_store_i8(i8 %value) {
+define i64 @___reserved_store_i8(i8** %base_ptrptr, i64* %index_ptr, i8 %value) {
 	; get the globals for the heap
-	%base_ptr = load i8*, i8** @heap_base_ptr
-	%index = load i64, i64* @heap_index
+	%base_ptr = load i8*, i8** %base_ptrptr
+	%index = load i64, i64* %index_ptr
 	; construct the current pointer and the integer
 	; to be returned from it
 	%i8_ptr = getelementptr i8, i8* %base_ptr, i64 %index
@@ -106,9 +106,19 @@ define i64 @___reserved_heap_store_i8(i8 %value) {
 	store i8 %value, i8* %i8_ptr
 	; increment the heap index
 	%new_index = add i64 %index, 1
-	store i64 %new_index, i64* @heap_index
+	store i64 %new_index, i64* %index_ptr
 	; return the address stored to as an integer
 	ret i64 %int_addr
+}
+
+define i64 @___reserved_heap_store_i8(i8 %value) {
+	%res = call i64 @___reserved_store_i8(i8** @heap_base_ptr, i64* @heap_index, i8 %value)
+	ret i64 %res
+}
+
+define i64 @___reserved_symbols_store_i8(i8 %value) {
+	%res = call i64 @___reserved_store_i8(i8** @symbols_base_ptr, i64* @symbols_index, i8 %value)
+	ret i64 %res
 }
 
 define i64 @___reserved_align(i8** %base_ptrptr, i64* %index_ptr) {
@@ -180,7 +190,6 @@ define i64 @___reserved_symbols_store_i8_array(i8* %array_ptr) {
 	ret i64 %new_array_addr
 }
 
-; TODO: this is not aligned :/
 define i64 @___reserved_symbols_create(i8* %array_ptr) {
 	; load the symbol tag and the heap mask
 	%symbol_tag = load i64, i64* @prim_symbol_tag
@@ -197,15 +206,13 @@ find_symbol_loop:
 	%symbol_len = call i64 @strlen(i8* %symbol_ptr)
 	%tmp_counter = add i64 %counter, %symbol_len
 	%new_counter = add i64 %tmp_counter, 1
-	%tmp = and i64 %new_counter, %heap_mask
-	%diff = sub i64 %new_counter, %tmp
-	%tmp_new_counter_aligned = add i64 %new_counter, %diff
-	%new_counter_aligned = add i64 %tmp_new_counter_aligned, 1
-	store i64 %new_counter_aligned, i64* %counter_ptr
+	store i64 %new_counter, i64* %counter_ptr
+	call i64 @___reserved_align(i8** @symbols_base_ptr, i64* %counter_ptr)
 	%strcmp_equal = call i64 @strcmp(i8* %symbol_ptr, i8* %array_ptr)
 	%test_equal = icmp eq i64 %strcmp_equal, 0
 	br i1 %test_equal, label %symbol_present, label %symbol_not_yet_found
 symbol_not_yet_found:
+	%new_counter_aligned = load i64, i64* %counter_ptr
 	%next_symbol_ptr = getelementptr i8, i8* %base_ptr, i64 %new_counter_aligned
 	%next_symbol_first = load i8, i8* %next_symbol_ptr
 	%test_zero = icmp eq i8 %next_symbol_first, 0
@@ -219,6 +226,7 @@ symbol_present:
 symbol_not_present:
 	; otherwise store the symbol's string and return the address
 	%new_symbol_addr = call i64 @___reserved_symbols_store_i8_array(i8* %array_ptr)
+	call i64 @___reserved_symbols_store_i8(i8 0)
 	call i64 @___reserved_symbols_align()
 	%tagged_new_symbol_addr = or i64 %new_symbol_addr, %symbol_tag
 	ret i64 %tagged_new_symbol_addr

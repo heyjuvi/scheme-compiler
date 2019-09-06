@@ -13,7 +13,7 @@
 (newline)
 
 (define symbols-are-still-equal
-  (equal? 'still-a-symbol 'still-a-symbol))
+  (equal? 'some-other-symbol 'some-other-symbol))
 
 (display "Symbol equality still works?")
 (display symbols-are-still-equal)
@@ -41,7 +41,7 @@
 (newline)
 
 (define quoted-lists-are-not-equal
-  (equal? '(a b c) '(a b c d)))
+  (not (equal? '(a b c) '(a b c d))))
 
 (display "Quoted lists inequality works?")
 (display quoted-lists-are-not-equal)
