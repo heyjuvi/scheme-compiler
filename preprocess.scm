@@ -24,6 +24,9 @@
 			 (make-body (preprocess (car (define-body x))))))
        (else
 	 (error "define could not be preprocessed: " x))))
+    ((cond? x)
+     ;(display (preprocess-cond->if (cond-clauses x))) (newline) (newline)
+     (preprocess (preprocess-cond->if (cond-clauses x))))
     ((immediate? x) x)
     ((string? x) x)
     ((primcall? x)
@@ -39,6 +42,20 @@
     ((var? x) x)
     (else
       (error "Not preprocessable: " x))))
+
+(define (preprocess-cond->if x)
+  (if (null? x)
+    ; this is convention for now, one-handed ifs are not
+    ; supported at the moment
+    #f
+    (let* ((clause (car x))
+	   (clause-test (cond-clause-test clause))
+	   (clause-body (cond-clause-body clause)))
+      (if (eq? clause-test 'else)
+        (make-begin clause-body)
+        (make-if clause-test
+	         (make-begin clause-body)
+	         (preprocess-cond->if (cdr x)))))))
 
 (define (preprocess-list->cons x)
   (cond

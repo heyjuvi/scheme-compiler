@@ -24,6 +24,13 @@ define i64 @prim_string_length(i64 %string) {
 }
 
 define i64 @prim_string_equal(i64 %string1, i64 %string2) {
+	; check tag equality first
+        %heap_mask = load i64, i64* @prim_heap_mask
+        %string1_tag = and i64 %string1, %heap_mask
+        %string2_tag = and i64 %string2, %heap_mask
+        %tag_test = icmp eq i64 %string1_tag, %string2_tag
+        br i1 %tag_test, label %check_string_equality, label %not_equal
+check_string_equality:
 	; remove the tags
         %string_tag = load i64, i64* @prim_string_tag
         %string1_addr = xor i64 %string1, %string_tag

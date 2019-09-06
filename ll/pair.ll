@@ -39,6 +39,13 @@ define i64 @prim_pair_cdr(i64 %pair) {
 }
 
 define i64 @prim_pair_equal(i64 %x, i64 %y) {
+	; check tag equality first
+	%heap_mask = load i64, i64* @prim_heap_mask
+	%x_tag = and i64 %x, %heap_mask
+	%y_tag = and i64 %y, %heap_mask
+	%tag_test = icmp eq i64 %x_tag, %y_tag
+	br i1 %tag_test, label %check_pair_equality, label %not_equal
+check_pair_equality:
 	; get the cars and cdrs
 	%x_car = call i64 @prim_pair_car(i64 %x)
 	%x_cdr = call i64 @prim_pair_cdr(i64 %x)
@@ -50,6 +57,9 @@ define i64 @prim_pair_equal(i64 %x, i64 %y) {
 	%both_equal = call i64 @prim_bool_and(i64 %cars_equal, i64 %cdrs_equal)
 	; return the result
 	ret i64 %both_equal
+not_equal:
+	%res_not_equal = load i64, i64* @prim_bool_false
+	ret i64 %res_not_equal
 }
 
 define i64 @prim_list_ref(i64 %start_pair, i64 %tagged_index) {

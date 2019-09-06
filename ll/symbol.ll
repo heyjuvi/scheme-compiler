@@ -11,6 +11,13 @@ define i64 @prim_string_to_symbol(i64 %string) {
 }
 
 define i64 @prim_symbol_equal(i64 %x, i64 %y) {
+	; check tag equality first
+        %heap_mask = load i64, i64* @prim_heap_mask
+        %x_tag = and i64 %x, %heap_mask
+        %y_tag = and i64 %y, %heap_mask
+        %tag_test = icmp eq i64 %x_tag, %y_tag
+        br i1 %tag_test, label %check_symbol_equality, label %not_equal
+check_symbol_equality:
 	; we simply compare the symbols as they are, because
 	; symbols of equal strings have equal addresses
         %test = icmp eq i64 %x, %y

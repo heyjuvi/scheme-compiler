@@ -13,10 +13,30 @@
 	    (and (equal? (evaluate-cond "hello, fellow kidz") 3)
 	         (equal? (evaluate-cond 1234567890) 4)))))
      
-
 (display "All cond cases trigger correctly?")
 (display cond-cases-trigger-correctly)
 (newline)
 
-cond-cases-trigger-correctly
+(define elseless-cond-which-evaluates-false-because-of-missing-else-works
+  (not
+    (cond
+      ((equal? 2 'some-symbol) #t)
+      ((equal? (list 2) '(a b c)) #t))))
+
+(display "Elseless cond, which evaluates to false because of the missing else works?")
+(display elseless-cond-which-evaluates-false-because-of-missing-else-works)
+(newline)
+
+(define elseless-cond-which-evaluates-true-works
+  (cond
+    ((equal? 2 'some-other-symbol) #f)
+    ((equal? `(,'a-symbol) '(a-symbol)) #t)))
+
+(display "Elseless cond, which evaluates to true works?")
+(display elseless-cond-which-evaluates-true-works)
+(newline)
+
+(and cond-cases-trigger-correctly
+     (and elseless-cond-which-evaluates-false-because-of-missing-else-works
+	  elseless-cond-which-evaluates-true-works))
 

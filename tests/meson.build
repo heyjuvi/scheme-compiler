@@ -16,6 +16,7 @@ tests = [
   [ 'Testing the closure primitive', 'closure.scm' ],
   [ 'Testing the string primitive', 'string.scm' ],
   [ 'Testing the symbol primitive', 'symbol.scm' ],
+  [ 'Testing the if expression behaviour', 'if.scm' ],
   [ 'Testing the begin expression behaviour', 'begin.scm' ],
   [ 'Testing the let expression behaviour', 'let.scm' ],
   [ 'Testing the cond expression behaviour', 'cond.scm' ],
