@@ -47,7 +47,7 @@ define i64 @prim_pair_equal(i64 %x, i64 %y) {
 	; check if the cars are equal and the cdrs are equal
 	%cars_equal = call i64 @prim_generic_equal(i64 %x_car, i64 %y_car)
 	%cdrs_equal = call i64 @prim_generic_equal(i64 %x_cdr, i64 %y_cdr)
-	%both_equal = call i64 @prim_bool_equal(i64 %cars_equal, i64 %cdrs_equal)
+	%both_equal = call i64 @prim_bool_and(i64 %cars_equal, i64 %cdrs_equal)
 	; return the result
 	ret i64 %both_equal
 }

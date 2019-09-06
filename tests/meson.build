@@ -11,6 +11,7 @@ std_source_files = files([
 ])
 
 tests = [
+  [ 'Test of the pair primitive data type', 'pair.scm' ],
   [ 'Test of the vector primitive data type', 'vector.scm' ],
   [ 'Test of the closure primitive data type', 'closure.scm' ],
   [ 'Test of the string primitive data type', 'string.scm' ],

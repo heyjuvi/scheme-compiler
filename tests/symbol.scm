@@ -12,6 +12,27 @@
 (display symbols-are-not-equal)
 (newline)
 
+(define symbols-are-still-equal
+  (equal? 'still-a-symbol 'still-a-symbol))
+
+(display "Symbol equality still works?")
+(display symbols-are-still-equal)
+(newline)
+
+(define identical-quoted-lists-are-equal
+  (equal? '(a b c) '(a b c)))
+
+(display "Identical quoted lists equality works?")
+(display identical-quoted-lists-are-equal)
+(newline)
+
+(define empty-lists-are-equal
+  (equal? '() '()))
+
+(display "Empty lists equality works?")
+(display empty-lists-are-equal)
+(newline)
+
 (define quoted-lists-are-equal
   (equal? '(a b c) (list 'a 'b 'c)))
 
@@ -33,9 +54,6 @@
 (display quasiquote-works)
 (newline)
 
-(display (car (cdr `(2 ,(+ 2 2)))))
-(display (car (cdr '(2 4))))
-
 (define nested-quasiquote-works
   (equal? `(`(+ 2 2) ,`(2 ,(+ 2 2)))
 	  '(`(+ 2 2) (2 4))))
@@ -45,9 +63,12 @@
 (newline)
 
 (and (and symbols-are-equal
-          symbols-are-not-equal)
-     (and (and quoted-lists-are-equal
-	       quoted-lists-are-not-equal)
+          (and symbols-are-not-equal
+	       symbols-are-still-equal))
+     (and (and (and identical-quoted-lists-are-equal
+		    empty-lists-are-equal)
+               (and quoted-lists-are-equal
+	            quoted-lists-are-not-equal))
 	  (and quasiquote-works
 	       nested-quasiquote-works)))
 
