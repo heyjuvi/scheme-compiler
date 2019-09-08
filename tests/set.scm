@@ -26,5 +26,20 @@
 (display set-inside-let-works)
 (newline)
 
-(and remembering-set-values-inside-lambda-works
-     set-inside-let-works)
+(define some-global-var 0)
+(define (set-some-global-var x)
+  (set! some-global-var x))
+
+(set-some-global-var 23)
+
+(define setting-global-var-works
+  (equal? some-global-var 23))
+
+(display "Setting a global variable works?")
+(display setting-global-var-works)
+(newline)
+
+(and (and remembering-set-values-inside-lambda-works
+          set-inside-let-works)
+     setting-global-var-works)
+

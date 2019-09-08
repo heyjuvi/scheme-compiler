@@ -246,8 +246,6 @@
   (let* ((vector-elems (cdr x))
 	 (vector-len (length vector-elems))
 	 (tmp1 (unique-var)))
-;    (display "len: ") (display vector-len) (newline)
-;    (display "elems: ") (display vector-elems) (newline)
     (emit-expr vector-len tmp1 env)
     (emit-call1 "prim_vector_init" tmp1 var)
     (for-each
@@ -274,6 +272,23 @@
       ; we simply emit a symbol, preprocessing has eliminated
       ; all deeper levels of quotation (this is still to do)
       (emit-symbol content var env))))
+
+(define (emit-global-set! x var env)
+  (let ((var-ll-var (assoc (set!-var x) env)))
+    (if (not (eq? var-ll-var #f))
+      (let ((ll-var (cdr var-ll-var))
+	    (new-val (set!-val x))
+	    (tmp1 (unique-var)))
+        (cond
+	  ((local-ll-var? ll-var)
+	   (error "local ll variable assignment is not possible" x))
+	  ((global-ll-var? ll-var)
+	   (emit-expr new-val tmp1 env)
+	   (emit-store tmp1 ll-var)
+	   ; just to have something valid returned
+	   (emit-expr #t var env))
+	  (else (error "neither local nor global variable" ll-var))))
+      (error "no such variable in env" x))))
 
 (define (emit-application x var env)
   (let* ((evaluated-list
@@ -334,6 +349,8 @@
      (emit-closure x var env))
     ((quote? x)
      (emit-quote x var env))
+    ((set!? x)
+     (emit-global-set! x var env))
     ((list? x)
      (emit-application x var env))
     ((var? x)

@@ -70,6 +70,7 @@
     ((immediate? x) '())
     ((string? x) '())
     ((vector-primcall? x) (set-union-many (map free-vars (cdr x))))
+    ((set!? x) (free-vars (set!-val x)))
     ((quote? x) '())
     ((null? x) '())
     ((primcall? x) (set-union-many (map free-vars (cdr x))))
