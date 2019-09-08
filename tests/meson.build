@@ -13,13 +13,14 @@ std_source_files = files([
 tests = [
   [ 'Testing the pair primitive', 'pair.scm' ],
   [ 'Testing the vector primitive', 'vector.scm' ],
-  [ 'Testing the closure primitive', 'closure.scm' ],
+#  [ 'Testing the closure primitive', 'closure.scm' ],
   [ 'Testing the string primitive', 'string.scm' ],
   [ 'Testing the symbol primitive', 'symbol.scm' ],
   [ 'Testing the if expression behaviour', 'if.scm' ],
   [ 'Testing the begin expression behaviour', 'begin.scm' ],
   [ 'Testing the let expression behaviour', 'let.scm' ],
   [ 'Testing the cond expression behaviour', 'cond.scm' ],
+  [ 'Testing the set! expression behaviour', 'set.scm' ],
 ]
 
 driver_source_file = 'driver.c'

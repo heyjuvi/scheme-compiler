@@ -12,6 +12,7 @@
     (else #f)))
 
 (define (list-primcall? x) (tagged-list? x 'list))
+(define (vector-primcall? x) (tagged-list? x 'vector))
 
 (define (primcall-operator x) (car x))
 (define (primcall-operand1 x) (cadr x))
@@ -66,7 +67,9 @@
   (map let-binding-val (let-bindings x)))
 (define (let-body x) (cddr x))
 (define (make-let bindings body)
-  (cons 'let (cons bindings body)))
+  (if (null? bindings)
+    (car body)
+    (cons 'let (cons bindings body))))
 
 (define (begin? x) (tagged-list? x 'begin))
 (define (begin-body x) (cdr x))
@@ -168,3 +171,8 @@
   (make-define (make-define-function-head name args) body))
 (define (make-define-var name body)
   (make-define name body))
+
+(define (set!? x) (tagged-list? x 'set!))
+(define (set!-var x) (cadr x))
+(define (set!-val x) (caddr x))
+(define (make-set! var val) (list 'set! var val))

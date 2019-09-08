@@ -1,11 +1,26 @@
+(define id-counter 0)
+(define (unique-id)
+  (set! id-counter (add1 id-counter))
+  (string->symbol (format "id~A" id-counter)))
+
 (define (preprocess x)
   (cond
     ((let? x)
      (make-let (let-bindings x)
-	       (make-body (preprocess (make-begin (let-body x))))))
+	       (make-body
+		 (make-begin
+		   (make-body
+		     (preprocess-vars->refs
+		       (preprocess (let-body x))
+		       (let-bindings-vars x)))))))
     ((lambda? x)
      (make-lambda (lambda-args x)
-	          (make-body (preprocess (make-begin (lambda-body x))))))
+		  (make-body
+		    (make-begin
+		      (make-body
+			(preprocess-vars->refs
+			  (preprocess (lambda-body x))
+			  (lambda-args x)))))))
     ((if? x)
      (make-if (preprocess (if-test x))
 	      (preprocess (if-conseq x))
@@ -17,11 +32,17 @@
        ((define-function? x)
 	(preprocess
           (make-define-var (define-function-name x)
-			   (make-body (make-lambda (define-function-args x)
-						   (make-body (make-begin (define-body x))))))))
+			   (make-body
+			     (make-lambda
+			       (define-function-args x)
+			       (make-body
+				 (make-begin
+				   (define-body x))))))))
        ((define-var? x)
 	(make-define-var (define-id x)
-			 (make-body (preprocess (car (define-body x))))))
+			 (make-body
+			   (preprocess
+			     (car (define-body x))))))
        (else
 	 (error "define could not be preprocessed: " x))))
     ((cond? x)
@@ -42,6 +63,45 @@
     ((var? x) x)
     (else
       (error "Not preprocessable: " x))))
+
+(define (preprocess-vars->refs_ x arg-id-pairs)
+  (cond
+    ((set!? x)
+     (let ((vec-var (assoc (set!-var x) arg-id-pairs)))
+       (if (eq? vec-var #f)
+	 x
+	 `(vector-set! ,(cdr vec-var)
+		       0
+		       ,(preprocess-vars->refs_ (set!-val x) arg-id-pairs)))))
+    ((var? x)
+     (let ((vec-var (assoc x arg-id-pairs)))
+       (if (eq? vec-var #f)
+	 x
+	 `(vector-ref ,(cdr vec-var) 0))))
+    ((lambda? x)
+     (make-lambda (lambda-args x)
+		  (preprocess-vars->refs_ (lambda-body x)
+					  arg-id-pairs)))
+    ((let? x)
+     (make-let (let-bindings x)
+	       (preprocess-vars->refs_ (let-body x)
+                                       arg-id-pairs)))
+    ((immediate? x) x)
+    ((string? x) x)
+    ((quote? x) x)
+    ; this would'nt do anything, closures do not occur at this
+    ; stage of compiling
+    ;((closure? x) x)
+    ((list? x)
+     (map (lambda (y) (preprocess-vars->refs_ y arg-id-pairs)) x))
+    (else
+      (error "preprocess-args->refs has not implemented" x))))
+(define (preprocess-vars->refs x args)
+  (let ((arg-id-pairs (map (lambda (a) (cons a (unique-id))) args)))
+  (make-let (map (lambda (p) `(,(cdr p) (vector ,(car p)))) arg-id-pairs)
+	    (make-body
+	      (make-begin
+		(preprocess-vars->refs_ x arg-id-pairs))))))
 
 (define (preprocess-cond->if x)
   (if (null? x)

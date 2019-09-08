@@ -133,15 +133,18 @@
 		 var
 		 (extend-env b-var tmp1 env)))))
 (define (emit-let x var env)
+  (debug "EMIT-LET -- body = ") (debug (car (let-body x))) (debug-newline)
   (emit-let_ x (let-bindings x) var env))
 
 (define (emit-begin_ body var env)
-  (debug (car body)) (debug-newline) (debug-newline)
+  (debug "EMIT-BEGIN -- rest of body = ") (debug body) (debug-newline) (debug-newline)
   (if (not (null? body))
     (begin
+      (emit-begin_ (cdr body) (unique-var) env)
       (emit-expr (car body) var env))
-      (emit-begin_ (cdr body) (unique-var) env)))
+    'no-more-expressions))
 (define (emit-begin x var env)
+  (debug "EMIT-BODY -- body = ") (debug (begin-body x)) (debug-newline)
   (emit-begin_ (reverse (begin-body x)) var env))
 
 (define (emit-c-env_ c-env-var free-vars n env)
@@ -239,6 +242,26 @@
     (puts (format "  ~A = load i64, i64* @prim_string_tag" tmp2))
     (puts (format "  ~A = or i64 ~A, ~A" var tmp1 tmp2))))
 
+(define (emit-vector x var env)
+  (let* ((vector-elems (cdr x))
+	 (vector-len (length vector-elems))
+	 (tmp1 (unique-var)))
+;    (display "len: ") (display vector-len) (newline)
+;    (display "elems: ") (display vector-elems) (newline)
+    (emit-expr vector-len tmp1 env)
+    (emit-call1 "prim_vector_init" tmp1 var)
+    (for-each
+      (lambda (i)
+	(let ((tmp2 (unique-var))
+	      (tmp3 (unique-var))
+	      (tmp4 (unique-var)))
+	  ; emit the index to set
+	  (emit-expr i tmp2 env)
+	  ; emit the value to set
+	  (emit-expr (list-ref vector-elems i) tmp3 env)
+	  (emit-call3 "prim_vector_set" var tmp2 tmp3 tmp4)))
+      (iota vector-len))))
+
 (define (emit-symbol x var env)
   (let ((tmp1 (unique-var)))
     (emit-string (symbol->string x) tmp1 env)
@@ -297,6 +320,8 @@
      (emit-immediate x var))
     ((string? x)
      (emit-string x var env))
+    ((vector-primcall? x)
+     (emit-vector x var env))
     ((primcall? x)
      (emit-primcall x var env))
     ((if? x)
@@ -357,9 +382,13 @@
 	 (p-ast (map preprocess ast)))
     (extract-global-vars p-ast)
     (let ((cp-ast (map lambdas->closures p-ast)))
+      (debug "FUNCTIONS: ") (debug-newline)
       (debug functions) (debug-newline) (debug-newline)
+      (debug "AST: ") (debug-newline)
       (debug ast) (debug-newline) (debug-newline)
+      (debug "PREPROCESSED AST: ") (debug-newline)
       (debug p-ast) (debug-newline) (debug-newline)
+      (debug "CLOSURE CONVERTED AND PREPROCESSED AST: ") (debug-newline)
       (debug cp-ast) (debug-newline) (debug-newline)
       (emit-main cp-ast))))
 
