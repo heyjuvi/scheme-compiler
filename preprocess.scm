@@ -13,6 +13,8 @@
 		     (preprocess-vars->refs
 		       (preprocess (let-body x))
 		       (let-bindings-vars x)))))))
+    ((let*? x)
+     (preprocess-let*->let x))
     ((lambda? x)
      (make-lambda (lambda-args x)
 		  (make-body
@@ -46,7 +48,6 @@
        (else
 	 (error "define could not be preprocessed: " x))))
     ((cond? x)
-     ;(display (preprocess-cond->if (cond-clauses x))) (newline) (newline)
      (preprocess (preprocess-cond->if (cond-clauses x))))
     ((immediate? x) x)
     ((string? x) x)
@@ -63,6 +64,18 @@
     ((var? x) x)
     (else
       (error "Not preprocessable: " x))))
+
+(define (preprocess-let*->let x)
+  (let ((bindings (let-bindings x)))
+    (if (equal? (length bindings) 1)
+      (make-let bindings (let-body x))
+      (let ((first-binding (car bindings))
+            (rest-bindings (cdr bindings)))
+        (make-let
+          (list first-binding)
+  	  (make-body
+            (preprocess-let*->let
+              (make-let* rest-bindings (let-body x)))))))))
 
 (define (preprocess-vars->refs_ x arg-id-pairs)
   (cond

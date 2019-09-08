@@ -9,4 +9,15 @@
 (display body-correctly-evaluated)
 (newline)
 
-body-correctly-evaluated
+(define let-star-correctly-evaluated
+  (let* ((a 2)
+	 (b (+ a 2))
+	 (c (+ b 2)))
+    (and (equal? b 4) (equal? c 6))))
+
+(display "Let* is evaluated correctly?")
+(display body-correctly-evaluated)
+(newline)
+
+(and body-correctly-evaluated
+     let-star-correctly-evaluated)

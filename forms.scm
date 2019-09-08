@@ -58,6 +58,7 @@
 (define (make-body x) (cons x '()))
 
 (define (let? x) (tagged-list? x 'let))
+(define (let*? x) (tagged-list? x 'let*))
 (define (let-bindings x) (cadr x))
 (define (let-binding-var x) (car x))
 (define (let-binding-val x) (cadr x))
@@ -66,6 +67,10 @@
 (define (let-bindings-vals x)
   (map let-binding-val (let-bindings x)))
 (define (let-body x) (cddr x))
+(define (make-let* bindings body)
+  (if (null? bindings)
+    (car body)
+    (cons 'let* (cons bindings body))))
 (define (make-let bindings body)
   (if (null? bindings)
     (car body)
