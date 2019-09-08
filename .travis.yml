@@ -5,7 +5,7 @@ os:
   - osx
 
 language:
-  - cpp
+  - c
 
 services:
   - docker
