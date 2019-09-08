@@ -13,7 +13,7 @@ std_source_files = files([
 tests = [
   [ 'Testing the pair primitive', 'pair.scm' ],
   [ 'Testing the vector primitive', 'vector.scm' ],
-#  [ 'Testing the closure primitive', 'closure.scm' ],
+  [ 'Testing the closure primitive', 'closure.scm' ],
   [ 'Testing the string primitive', 'string.scm' ],
   [ 'Testing the symbol primitive', 'symbol.scm' ],
   [ 'Testing the if expression behaviour', 'if.scm' ],
