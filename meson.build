@@ -8,6 +8,7 @@ llvm_ir_compiler = find_program('llc')
 source_files = files([
   'imports.scm',
   'compat-chicken.scm',
+  'compat-slang.scm',
   'misc.scm',
   'parser.scm',
   'forms.scm',
