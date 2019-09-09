@@ -23,6 +23,11 @@ define i64 @prim_string_length(i64 %string) {
 	ret i64 %tagged_length
 }
 
+define i64 @prim_is_string(i64 %value) {
+        %res = call i64 @___reserved_has_tag(i64* @prim_string_tag, i64* @prim_heap_mask, i64 %value)
+        ret i64 %res
+}
+
 define i64 @prim_string_equal(i64 %string1, i64 %string2) {
 	; check tag equality first
         %heap_mask = load i64, i64* @prim_heap_mask

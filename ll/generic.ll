@@ -1,4 +1,4 @@
-; TODO: char, empty list, pair, vector, symbol, closure
+; TODO: char, closure
 ; TODO: check, if both sides have the same type, otherwise
 ;       return false
 define i64 @prim_generic_equal(i64 %a, i64 %b) {

@@ -30,6 +30,11 @@ define i64 @prim_fixnum_div(i64 %x, i64 %y) {
 	ret i64 %res
 }
 
+define i64 @prim_is_fixnum(i64 %value) {
+        %res = call i64 @___reserved_has_tag(i64* @prim_fixnum_tag, i64* @prim_fixnum_mask, i64 %value)
+        ret i64 %res
+}
+
 define i64 @prim_fixnum_equal(i64 %x, i64 %y) {
 	%test = icmp eq i64 %x, %y
 	br i1 %test, label %equal, label %not_equal

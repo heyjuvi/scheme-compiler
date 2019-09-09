@@ -75,6 +75,20 @@ define i64 @___reserved_main() {
 ;	ret i64 %res
 ;}
 
+define i64 @___reserved_has_tag(i64* %tag_ptr, i64* %mask_ptr, i64 %value) {
+	%tag = load i64, i64* %tag_ptr
+        %mask = load i64, i64* %mask_ptr
+        %value_tag = and i64 %value, %mask
+        %test = icmp eq i64 %value_tag, %tag
+        br i1 %test, label %has_tag, label %has_not_tag
+has_tag:
+        %res_has_tag = load i64, i64* @prim_bool_true
+        ret i64 %res_has_tag
+has_not_tag:
+        %res_has_not_tag = load i64, i64* @prim_bool_false
+        ret i64 %res_has_not_tag
+}
+
 define i64 @___reserved_heap_store_i64(i64 %value) {
 	; get the globals for the heap
 	%base_ptr = load i8*, i8** @heap_base_ptr

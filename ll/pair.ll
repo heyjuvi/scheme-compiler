@@ -38,6 +38,30 @@ define i64 @prim_pair_cdr(i64 %pair) {
 	ret i64 %cdr
 }
 
+define i64 @prim_is_pair(i64 %value) {
+	%res = call i64 @___reserved_has_tag(i64* @prim_pair_tag, i64* @prim_heap_mask, i64 %value)
+	ret i64 %res
+}
+
+define i64 @prim_is_null(i64 %value) {
+        %res = call i64 @___reserved_has_tag(i64* @prim_pair_empty_list, i64* @prim_pair_empty_list_mask, i64 %value)
+        ret i64 %res
+}
+
+define i64 @prim_is_list(i64 %value) {
+	%bool_true = load i64, i64* @prim_bool_true
+	%is_pair = call i64 @prim_is_pair(i64 %value)
+	%pair_test = icmp eq i64 %is_pair, %bool_true
+	br i1 %pair_test, label %check_cdr, label %check_null
+check_cdr:
+	%cdr = call i64 @prim_pair_cdr(i64 %value)
+	%res_is_list = call i64 @prim_is_list(i64 %cdr)
+	ret i64 %res_is_list
+check_null:
+	%res_is_empty_list = call i64 @prim_is_null(i64 %value)
+	ret i64 %res_is_empty_list
+}
+
 define i64 @prim_pair_equal(i64 %x, i64 %y) {
 	; check tag equality first
 	%heap_mask = load i64, i64* @prim_heap_mask

@@ -62,6 +62,20 @@
 (display nested-quasiquote-works)
 (newline)
 
+(define symbol-is-symbol
+  (symbol? 'hi-im-a-symbol))
+
+(display "Symbol is identified as such?")
+(display symbol-is-symbol)
+(newline)
+
+(define no-symbol-is-no-symbol
+  (not (symbol? #t)))
+
+(display "Bool is not identified as symbol?")
+(display no-symbol-is-no-symbol)
+(newline)
+
 (and (and symbols-are-equal
           (and symbols-are-not-equal
 	       symbols-are-still-equal))
@@ -69,6 +83,8 @@
 		    empty-lists-are-equal)
                (and quoted-lists-are-equal
 	            quoted-lists-are-not-equal))
-	  (and quasiquote-works
-	       nested-quasiquote-works)))
+	  (and (and quasiquote-works
+	            nested-quasiquote-works)
+	       (and symbol-is-symbol
+		    no-symbol-is-no-symbol))))
 

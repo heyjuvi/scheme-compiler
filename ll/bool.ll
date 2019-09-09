@@ -20,6 +20,11 @@ false:
 	ret i64 %res_true
 }
 
+define i64 @prim_is_bool(i64 %value) {
+        %res = call i64 @___reserved_has_tag(i64* @prim_bool_tag, i64* @prim_bool_mask, i64 %value)
+        ret i64 %res
+}
+
 define i64 @prim_bool_equal(i64 %x, i64 %y) {
 	%test = icmp eq i64 %x, %y
 	br i1 %test, label %equal, label %not_equal

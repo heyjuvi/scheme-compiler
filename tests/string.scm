@@ -28,8 +28,24 @@
 (display appending-strings-still-works)
 (newline)
 
+(define string-is-string
+  (string? "abcdefghijklmnopqrstuvxyz"))
+
+(display "String is identified as such?")
+(display string-is-string)
+(newline)
+
+(define no-string-is-no-string
+  (not (string? '())))
+
+(display "Empty list is not identified as string?")
+(display no-string-is-no-string)
+(newline)
+
 (and (and strings-are-equal
 	  strings-are-not-equal)
-     (and appending-strings-works
-	  appending-strings-still-works))
+     (and (and appending-strings-works
+	       appending-strings-still-works)
+	  (and string-is-string
+	       no-string-is-no-string)))
 
