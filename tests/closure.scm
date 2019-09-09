@@ -41,6 +41,20 @@
 (display inline-lambda-works)
 (newline)
 
+(define (own-map f lst)
+  (if (null? lst)
+    '()
+    (cons (f (car lst)) (own-map f (cdr lst)))))
+
+(define mapped-values-are-correct
+  (equal? (own-map (lambda (x) (* x 2)) '(1 2 3 4))
+	  '(2 4 6 8)))
+
+(display "Mapped values are correct? (constructing own map)")
+(display mapped-values-are-correct)
+(newline)
+
 (and (and has-correct-values
           display-inside-lambda-works)
-     inline-lambda-works)
+     (and inline-lambda-works
+	  mapped-values-are-correct))
