@@ -12,5 +12,30 @@
 (display no-fixnum-is-no-fixnum)
 (newline)
 
-(and fixnum-is-fixnum
-     no-fixnum-is-no-fixnum)
+(define fixnum-equality-works
+  (equal? 42 42))
+
+(display "Fixnum equality works?")
+(display fixnum-equality-works)
+(newline)
+
+(define fixnum-inequality-works
+  (not (equal? 23 42)))
+
+(display "Fixnum inequality works?")
+(display fixnum-inequality-works)
+(newline)
+
+(define char-to-fixnum-conversion-works
+  (equal? (char->fixnum #\A) 65))
+
+(display "Char to fixnum conversion works?")
+(display char-to-fixnum-conversion-works)
+(newline)
+
+(and (and (and fixnum-is-fixnum
+              no-fixnum-is-no-fixnum)
+          (and fixnum-equality-works
+               fixnum-inequality-works))
+     char-to-fixnum-conversion-works)
+

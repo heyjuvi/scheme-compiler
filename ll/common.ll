@@ -34,6 +34,14 @@ declare i64 @snprintf(i8*, i64, i8*, ...);
 @symbols_index = global i64 0, align 8
 
 ; basic data type management
+@prim_fixnum_tag = global i64 0
+@prim_fixnum_shift = global i64 2
+@prim_fixnum_mask = global i64 3
+
+@prim_char_tag = global i64 15
+@prim_char_shift = global i64 8
+@prim_char_mask = global i64 255
+
 @prim_bool_true = global i64 159
 @prim_bool_false = global i64 31
 @prim_bool_mask = global i64 127
@@ -41,10 +49,6 @@ declare i64 @snprintf(i8*, i64, i8*, ...);
 
 @prim_pair_empty_list = global i64 47
 @prim_pair_empty_list_mask = global i64 255
-
-@prim_fixnum_tag = global i64 0
-@prim_fixnum_shift = global i64 2
-@prim_fixnum_mask = global i64 3
 
 @prim_heap_shift = global i64 3
 @prim_heap_mask = global i64 7

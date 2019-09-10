@@ -1,6 +1,7 @@
 std_source_files = files([
   '../ll/common.ll',
   '../ll/fixnum.ll',
+  '../ll/char.ll',
   '../ll/bool.ll',
   '../ll/pair.ll',
   '../ll/vector.ll',
@@ -12,6 +13,7 @@ std_source_files = files([
 
 tests = [
   [ 'Testing the fixnum primitive', 'fixnum.scm' ],
+  [ 'Testing the char primitive', 'char.scm' ],
   [ 'Testing the bool primitive', 'bool.scm' ],
   [ 'Testing the pair primitive', 'pair.scm' ],
   [ 'Testing the vector primitive', 'vector.scm' ],

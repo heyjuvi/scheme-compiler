@@ -7,6 +7,7 @@
 (define (fixnum->string x) (number->string x))
 (define (fixnum->char x) (integer->char x))
 
-(define (bool->fixnum x) (if x 1 0))
+(define (char->fixnum x) (char->integer x))
+(define (boolean->fixnum x) (if x 1 0))
 
 (define (caddddr x) (list-ref x 4))

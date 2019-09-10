@@ -1,14 +1,14 @@
 (define bool-is-bool
-  (and (bool? #t) (bool? #f)))
+  (and (boolean? #t) (boolean? #f)))
 
 (display "Bool is identified as such?")
 (display bool-is-bool)
 (newline)
 
 (define no-bool-is-no-bool
-  (not (bool? 'some-symbol)))
+  (not (boolean? 'some-symbol)))
 
-(display "Symbol is not identified as bool?")
+(display "Symbol is not identified as boolean?")
 (display no-bool-is-no-bool)
 (newline)
 
