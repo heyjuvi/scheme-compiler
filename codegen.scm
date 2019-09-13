@@ -262,7 +262,7 @@
     (if (< (length bytes) 8)
       (begin
         (puts (format "  ~A = getelementptr i8, i8* ~A, i64 ~A" (list tmp4 tmp2 (length bytes))))
-        (puts (format "  store i8 ~A, i8* ~A" 0 (list tmp4))))
+        (puts (format "  store i8 ~A, i8* ~A" (list 0 tmp4))))
       'last-block)
     (emit-load tmp3 tmp1)
     (puts (format "  ~A = call i64 @___reserved_heap_store_i64(i64 ~A)" (list var tmp3)))

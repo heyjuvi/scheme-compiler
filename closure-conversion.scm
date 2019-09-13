@@ -20,7 +20,7 @@
 (define lambda-name-counter 0)
 (define (unique-lambda-name)
   (set! lambda-name-counter (add1 lambda-name-counter))
-  (format "lambda~A" lambda-name-counter))
+  (format "lambda~A" (list lambda-name-counter)))
 
 (define (lambdas->closures x)
   (cond ((define-var? x)

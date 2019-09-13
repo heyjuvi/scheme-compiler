@@ -1,7 +1,7 @@
 (define id-counter 0)
 (define (unique-id)
   (set! id-counter (add1 id-counter))
-  (string->symbol (format "id~A" id-counter)))
+  (string->symbol (format "id~A" (list id-counter))))
 
 (define (preprocess x)
   (cond

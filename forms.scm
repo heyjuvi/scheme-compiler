@@ -133,8 +133,8 @@
 (define (args-string arg-vars)
   (cond
     ((null? arg-vars) "")
-    ((eq? (length arg-vars) 1) (format "i64 ~A" (car arg-vars)))
-    (else (string-append (format "i64 ~A, " (car arg-vars))
+    ((eq? (length arg-vars) 1) (format "i64 ~A" (list (car arg-vars))))
+    (else (string-append (format "i64 ~A, " (list (car arg-vars)))
 			 (args-string (cdr arg-vars))))))
 
 (define (var? x) (symbol? x))

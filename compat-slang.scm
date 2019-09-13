@@ -3,6 +3,10 @@
     '()
     (cons (f (car lst)) (map f (cdr lst)))))
 
+; TODO
+;(define (filter f lst)
+;  ...)
+
 (define (for-each f lst)
   (map f lst)
   'for-each-completed)
@@ -25,18 +29,22 @@
   (reverse (iota_ n)))
 
 (define (format_ str-lst lst)
-  (if (< (length str-lst) 2)
-    str-lst
-    (let ((first-char (car str-lst))
-	  (second-char (cadr str-lst))
-	  (rest-str-lst (cddr str-lst)))
-      (if (and (equal? first-char #\~)
-	       (or (equal? second-char #\A)
-		   (equal? second-char #\a)))
-        (append (any->string (car lst)) rest-str-lst))
-      )))
-
+  (cond
+    ((< (length str-lst) 2) str-lst)
+    ((null? lst) str-lst)
+    (else
+      (let ((first-char (car str-lst))
+	    (second-char (cadr str-lst))
+	    (rest-str-lst (cddr str-lst)))
+        (if (and (equal? first-char #\~)
+	         (or (equal? second-char #\A)
+		     (equal? second-char #\a)))
+          (append (string->list (any->string (car lst)))
+	          (format_ rest-str-lst (cdr lst)))
+	  (cons (car str-lst)
+	        (format_ (cdr str-lst) lst)))))))
 (define (format str lst)
+  (list->string (format_ (string->list str) lst)))
 
 (define (error str x)
   (display (string-append (string-append str ": ")
