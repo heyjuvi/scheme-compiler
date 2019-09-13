@@ -44,8 +44,9 @@ declare i64 @snprintf(i8*, i64, i8*, ...);
 
 @prim_bool_true = global i64 159
 @prim_bool_false = global i64 31
-@prim_bool_mask = global i64 127
 @prim_bool_tag = global i64 31
+@prim_bool_shift = global i64 7
+@prim_bool_mask = global i64 127
 
 @prim_pair_empty_list = global i64 47
 @prim_pair_empty_list_mask = global i64 255

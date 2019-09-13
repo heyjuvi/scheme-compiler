@@ -44,6 +44,7 @@
         (eq? op 'fixnum->string)
         (eq? op 'any->string)
         (eq? op 'char->fixnum)
+        (eq? op 'boolean->fixnum)
         (eq? op 'list-ref)
 	(eq? op 'boolean?)
 	(eq? op 'null?)

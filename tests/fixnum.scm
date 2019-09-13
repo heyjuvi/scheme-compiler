@@ -33,9 +33,26 @@
 (display char-to-fixnum-conversion-works)
 (newline)
 
+;(define unicode-char-to-fixnum-conversion-works
+;  (equal? (char->fixnum #\λ) 955))
+;
+;(display "Unicode char to fixnum conversion works?")
+;(display unicode-char-to-fixnum-conversion-works)
+;(newline)
+
+(define bool-to-fixnum-conversion-works
+  (and (equal? (boolean->fixnum #f) 0)
+       (equal? (boolean->fixnum #t) 1)))
+
+(display "Bool to fixnum conversion works?")
+(display bool-to-fixnum-conversion-works)
+(newline)
+
 (and (and (and fixnum-is-fixnum
               no-fixnum-is-no-fixnum)
           (and fixnum-equality-works
                fixnum-inequality-works))
-     char-to-fixnum-conversion-works)
+     (and (and char-to-fixnum-conversion-works
+	       #t) ;unicode-char-to-fixnum-conversion-works))
+	  bool-to-fixnum-conversion-works))
 

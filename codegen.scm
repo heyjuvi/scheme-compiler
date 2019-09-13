@@ -86,6 +86,9 @@
       ((eq? op 'char->fixnum)
        (emit-expr (primcall-operand1 x) tmp1 env)
        (emit-call1 "prim_char_to_fixnum" tmp1 var))
+      ((eq? op 'boolean->fixnum)
+       (emit-expr (primcall-operand1 x) tmp1 env)
+       (emit-call1 "prim_bool_to_fixnum" tmp1 var))
       ((eq? op 'boolean?)
        (emit-expr (primcall-operand1 x) tmp1 env)
        (emit-call1 "prim_is_bool" tmp1 var))
@@ -184,7 +187,7 @@
       env
       (begin
 	(emit-immediate n tmp1)
-        (puts (format "  ~A = call i64 @prim_list_ref(i64 ~A, i64 ~A)" tmp2 c-env-var tmp1))
+        (puts (format "  ~A = call i64 @prim_list_ref(i64 ~A, i64 ~A)" (list tmp2 c-env-var tmp1)))
 	(extend-env (car free-vars)
 		    tmp2
 		    (emit-c-env_ c-env-var
@@ -200,7 +203,7 @@
 	 (f-free-vars (function-free-vars x))
 	 (vars (map (lambda (a) (unique-var)) args))
 	 (ext-env_ (extend-env-many args vars env)))
-    (puts (format "define i64 @~A(~A) {" name (args-string vars)))
+    (puts (format "define i64 @~A(~A) {" (list name (args-string vars))))
     ; c-env is always the first arg
     (let ((ext-env (emit-c-env (car vars) f-free-vars ext-env_)))
       (emit-expr (function-body x) "%res" ext-env)
@@ -208,7 +211,7 @@
       (puts "}"))))
 
 (define (emit-global-var global-var)
-  (puts (format "~A = global i64 0, align 8" global-var)))
+  (puts (format "~A = global i64 0, align 8" (list global-var))))
 
 (define (emit-env x var env)
   (debug "EMIT-ENV -- env = ") (debug env) (debug-newline)
@@ -236,9 +239,9 @@
     (debug "EMIT-CLOSURE -- name = ") (debug name) (debug-newline)
     (debug "EMIT-CLOSURE -- free-vars = ") (debug free-vars) (debug-newline)
     (puts (format "  ~A = ptrtoint i64(~A)* @~A to i64"
-		  tmp1
-		  signature
-		  name))
+		  (list tmp1
+		        signature
+		        name)))
     (emit-env free-vars tmp2 env)
     (emit-call2 "prim_closure" tmp1 tmp2 var)))
 
@@ -248,21 +251,21 @@
 	(tmp3 (unique-var))
 	(tmp4 (unique-var)))
     (emit-alloca tmp1)
-    (puts (format "  ~A = bitcast i64* ~A to i8*" tmp2 tmp1))
+    (puts (format "  ~A = bitcast i64* ~A to i8*" (list tmp2 tmp1)))
     (for-each
       (lambda (i)
         (let ((tmp-for (unique-var))
   	      (byte (char->integer (list-ref bytes i))))
-          (puts (format "  ~A = getelementptr i8, i8* ~A, i64 ~A" tmp-for tmp2 i))
-          (puts (format "  store i8 ~A, i8* ~A" byte tmp-for))))
+          (puts (format "  ~A = getelementptr i8, i8* ~A, i64 ~A" (list tmp-for tmp2 i)))
+          (puts (format "  store i8 ~A, i8* ~A" (list byte tmp-for)))))
       (iota (min (length bytes) 8)))
     (if (< (length bytes) 8)
       (begin
-        (puts (format "  ~A = getelementptr i8, i8* ~A, i64 ~A" tmp4 tmp2 (length bytes)))
-        (puts (format "  store i8 ~A, i8* ~A" 0 tmp4)))
+        (puts (format "  ~A = getelementptr i8, i8* ~A, i64 ~A" (list tmp4 tmp2 (length bytes))))
+        (puts (format "  store i8 ~A, i8* ~A" 0 (list tmp4))))
       'last-block)
     (emit-load tmp3 tmp1)
-    (puts (format "  ~A = call i64 @___reserved_heap_store_i64(i64 ~A)" var tmp3))
+    (puts (format "  ~A = call i64 @___reserved_heap_store_i64(i64 ~A)" (list var tmp3)))
     (if (>= (length bytes) 8)
       (emit-string_ (drop bytes 8) (unique-var))
       'not-yet-last-block)))
@@ -271,8 +274,8 @@
 	(tmp1 (unique-var))
 	(tmp2 (unique-var)))
     (emit-string_ bytes tmp1)
-    (puts (format "  ~A = load i64, i64* @prim_string_tag" tmp2))
-    (puts (format "  ~A = or i64 ~A, ~A" var tmp1 tmp2))))
+    (puts (format "  ~A = load i64, i64* @prim_string_tag" (list tmp2)))
+    (puts (format "  ~A = or i64 ~A, ~A" (list var tmp1 tmp2)))))
 
 (define (emit-vector x var env)
   (let* ((vector-elems (cdr x))
@@ -341,8 +344,8 @@
     (debug "EMIT-APPLICATION -- env = ") (debug env) (debug-newline)
     (emit-call1 "prim_closure_func_addr" closure-var func-addr-var)
     (emit-call1 "prim_closure_env" closure-var func-env-var)
-    (puts (format "  ~A = inttoptr i64 ~A to i64(~A)*" func-ptr-var func-addr-var func-args-signature))
-    (puts (format "  ~A = call i64 ~A(~A)" var func-ptr-var func-args))))
+    (puts (format "  ~A = inttoptr i64 ~A to i64(~A)*" (list func-ptr-var func-addr-var func-args-signature)))
+    (puts (format "  ~A = call i64 ~A(~A)" (list var func-ptr-var func-args)))))
 
 (define (emit-fetch-var x var env)
   (debug "EMIT-FETCH-VAR -- x = ") (debug x) (debug-newline)

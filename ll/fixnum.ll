@@ -81,3 +81,16 @@ define i64 @prim_char_to_fixnum(i64 %x) {
 	ret i64 %tagged_fixnum
 }
 
+define i64 @prim_bool_to_fixnum(i64 %x) {
+	; load necessary shifts and tags
+	%bool_shift = load i64, i64* @prim_bool_shift
+	%fixnum_shift = load i64, i64* @prim_fixnum_shift
+	%fixnum_tag = load i64, i64* @prim_fixnum_tag
+	; convert the char value to fixnum
+	%unshifted_bool = lshr i64 %x, %bool_shift
+	%shifted_fixnum = shl i64 %unshifted_bool, %fixnum_shift
+	%tagged_fixnum = or i64 %shifted_fixnum, %fixnum_tag
+	; return the fixnum
+	ret i64 %tagged_fixnum
+}
+

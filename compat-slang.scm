@@ -24,6 +24,20 @@
 (define (iota n)
   (reverse (iota_ n)))
 
+(define (format_ str-lst lst)
+  (if (< (length str-lst) 2)
+    str-lst
+    (let ((first-char (car str-lst))
+	  (second-char (cadr str-lst))
+	  (rest-str-lst (cddr str-lst)))
+      (if (and (equal? first-char #\~)
+	       (or (equal? second-char #\A)
+		   (equal? second-char #\a)))
+        (append (any->string (car lst)) rest-str-lst))
+      )))
+
+(define (format str lst)
+
 (define (error str x)
   (display (string-append (string-append str ": ")
 	   (format "~A" x)))
