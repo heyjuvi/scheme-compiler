@@ -28,6 +28,7 @@
         (eq? op '-)
         (eq? op '*)
         (eq? op '/)
+        (eq? op 'eq?)
         (eq? op 'equal?)
         (eq? op 'and)
         (eq? op 'or)

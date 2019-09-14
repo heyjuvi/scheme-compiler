@@ -1,3 +1,14 @@
+define i64 @prim_fixnum_eq(i64 %a, i64 %b) {
+	%test = icmp eq i64 %a, %b
+	br i1 %test, label %equal, label %not_equal
+equal:
+	%res_equal = load i64, i64* @prim_bool_true
+	ret i64 %res_equal
+not_equal:
+	%res_not_equal = load i64, i64* @prim_bool_false
+	ret i64 %res_not_equal
+}
+
 ; TODO: closure
 define i64 @prim_generic_equal(i64 %a, i64 %b) {
 test_fixnum:
