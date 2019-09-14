@@ -85,7 +85,14 @@ define i64 @main(i64 %argc, i8** %argv) {
 	store i8** %argv, i8*** @argv
 	; call the actual main
 	%res = call i64 @___reserved_main()
-	ret i64 %res
+	; TODO: for now, expect a bool as last expression
+	%bool_true = load i64, i64* @prim_bool_true
+	%test_res = icmp eq i64 %res, %bool_true
+	br i1 %test_res, label %return_success, label %return_fail
+return_success:
+	ret i64 0
+return_fail:
+	ret i64 255
 }
 
 define i64 @prim_process_argc() {

@@ -1,4 +1,4 @@
-define i64 @prim_fixnum_eq(i64 %a, i64 %b) {
+define i64 @prim_generic_eq(i64 %a, i64 %b) {
 	%test = icmp eq i64 %a, %b
 	br i1 %test, label %equal, label %not_equal
 equal:
