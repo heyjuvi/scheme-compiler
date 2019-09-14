@@ -10,6 +10,12 @@
       (cons (car lst) (filter f (cdr lst)))
       (filter f (cdr lst)))))
 
+(define (assoc x lst)
+  (let ((filtered-lst (filter (lambda (p) (equal? x (car p))) lst)))
+    (if (eq? filtered-lst '())
+      #f
+      (car filtered-lst))))
+
 (define (for-each f lst)
   (map f lst)
   'for-each-completed)
