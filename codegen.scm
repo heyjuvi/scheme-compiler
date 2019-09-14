@@ -121,6 +121,10 @@
        (emit-call1 "prim_display" tmp1 var))
       ((eq? op 'newline)
        (emit-call0 "prim_newline" var))
+      ((eq? op 'argc)
+       (emit-call0 "prim_process_argc" var))
+      ((eq? op 'argv)
+       (emit-call0 "prim_process_argv" var))
       (else (error "no such primcall")))))
 
 (define (emit-if x var env)

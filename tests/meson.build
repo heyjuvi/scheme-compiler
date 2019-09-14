@@ -27,12 +27,12 @@ tests = [
   [ 'Testing the set! expression behaviour', 'set.scm' ],
 ]
 
-driver_source_file = 'driver.c'
-driver_object_file = 'driver.c.o'
-driver_object = custom_target('driver',
-  output : driver_object_file,
-  input : driver_source_file,
-  command : [ c_compiler, '@INPUT@', '-m64', '-c', '-g', '-o', '@OUTPUT@' ])
+#driver_source_file = 'driver.c'
+#driver_object_file = 'driver.c.o'
+#driver_object = custom_target('driver',
+#  output : driver_object_file,
+#  input : driver_source_file,
+#  command : [ c_compiler, '@INPUT@', '-m64', '-c', '-g', '-o', '@OUTPUT@' ])
 
 foreach test_data : tests
   test_description = test_data[0]
@@ -53,7 +53,7 @@ foreach test_data : tests
     input : combined_test_ll_source,
     command : [ llvm_ir_compiler, '@INPUT@', '--filetype=obj', '-o', '@OUTPUT@' ])
   test_executable = executable(test_source_filename + '.elf',
-    sources : [ combined_test_ll_object, driver_object ],
+    sources : [ combined_test_ll_object ],
     c_args : [ '-m64', '-g' ],
     link_args : [ '-no-pie' ])
   test(test_description, test_executable)

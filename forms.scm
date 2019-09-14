@@ -55,7 +55,9 @@
 	(eq? op 'string?)
 	(eq? op 'symbol?)
 	(eq? op 'display)
-	(eq? op 'newline)))
+	(eq? op 'newline)
+	(eq? op 'argc)
+	(eq? op 'argv)))
     #f))
 
 (define (if? x) (tagged-list? x 'if))

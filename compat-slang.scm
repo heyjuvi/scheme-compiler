@@ -3,9 +3,12 @@
     '()
     (cons (f (car lst)) (map f (cdr lst)))))
 
-; TODO
-;(define (filter f lst)
-;  ...)
+(define (filter f lst)
+  (if (null? lst)
+    '()
+    (if (f (car lst))
+      (cons (car lst) (filter f (cdr lst)))
+      (filter f (cdr lst)))))
 
 (define (for-each f lst)
   (map f lst)

@@ -60,6 +60,10 @@ declare i64 @snprintf(i8*, i64, i8*, ...);
 @prim_symbol_tag = global i64 5
 @prim_closure_tag = global i64 6
 
+; process context
+@argc = global i64 0
+@argv = global i8** zeroinitializer
+
 define i64 @___reserved_main() {
 	; allocate the heap and store its pointer
 	%heap_ptr = call i8* @calloc(i32 10000, i32 8)
@@ -75,10 +79,68 @@ define i64 @___reserved_main() {
 	ret i64 %res
 }
 
-;define i64 @main() {
-;	%res = call i64 @___reserved_main()
-;	ret i64 %res
-;}
+define i64 @main(i64 %argc, i8** %argv) {
+	; store the process context
+	store i64 %argc, i64* @argc
+	store i8** %argv, i8*** @argv
+	; call the actual main
+	%res = call i64 @___reserved_main()
+	ret i64 %res
+}
+
+define i64 @prim_process_argc() {
+	; load the fixnum tag and shift
+	%fixnum_tag = load i64, i64* @prim_fixnum_tag
+	%fixnum_shift = load i64, i64* @prim_fixnum_shift
+	; make the fixnum
+	%argc = load i64, i64* @argc
+	%fixnum = shl i64 %argc, %fixnum_shift
+	%tagged_fixnum = or i64 %fixnum, %fixnum_tag
+	; return it
+	ret i64 %tagged_fixnum
+}
+
+define i64 @prim_process_argv() {
+	; get the args and prepare list creation
+	%string_tag = load i64, i64* @prim_string_tag
+	%argc = load i64, i64* @argc
+	%argv = load i8**, i8*** @argv
+	%empty_list = load i64, i64* @prim_pair_empty_list
+	%current_index_ptr = alloca i64, align 8
+	%current_pair_ptr = alloca i64, align 8
+	%start_index = sub i64 %argc, 1
+	; last list elements are the last element and the empty list
+	%last_elem_ptrptr = getelementptr i8*, i8** %argv, i64 %start_index
+	%last_elem_ptr = load i8*, i8** %last_elem_ptrptr
+	%last_elem = call i64 @___reserved_heap_store_i8_array(i8* %last_elem_ptr)
+	call i64 @___reserved_heap_store_i8(i8 0)
+	call i64 @___reserved_heap_align()
+	%tagged_last_elem = or i64 %last_elem, %string_tag
+	%start_pair = call i64 @prim_pair_cons(i64 %tagged_last_elem, i64 %empty_list)
+	store i64 %start_pair, i64* %current_pair_ptr
+	%loop_start_index = sub i64 %start_index, 1
+	store i64 %loop_start_index, i64* %current_index_ptr
+	%start_index_is_zero = icmp eq i64 %start_index, 0
+	br i1 %start_index_is_zero, label %return_list, label %args_list_loop
+args_list_loop:
+	%current_index = load i64, i64* %current_index_ptr
+	%current_pair = load i64, i64* %current_pair_ptr
+	%elem_ptrptr = getelementptr i8*, i8** %argv, i64 %current_index
+	%elem_ptr = load i8*, i8** %elem_ptrptr
+	%elem = call i64 @___reserved_heap_store_i8_array(i8* %elem_ptr)
+	call i64 @___reserved_heap_store_i8(i8 0)
+	call i64 @___reserved_heap_align()
+	%tagged_elem = or i64 %elem, %string_tag
+	%new_pair = call i64 @prim_pair_cons(i64 %tagged_elem, i64 %current_pair)
+	%new_index = sub i64 %current_index, 1
+	store i64 %new_index, i64* %current_index_ptr
+	store i64 %new_pair, i64* %current_pair_ptr
+	%current_index_is_zero = icmp eq i64 %current_index, 0
+	br i1 %current_index_is_zero, label %return_list, label %args_list_loop
+return_list:
+	%res_pair = load i64, i64* %current_pair_ptr
+	ret i64 %res_pair
+}
 
 define i64 @___reserved_has_tag(i64* %tag_ptr, i64* %mask_ptr, i64 %value) {
 	%tag = load i64, i64* %tag_ptr
