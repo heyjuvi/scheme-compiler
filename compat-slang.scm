@@ -60,3 +60,17 @@
 	   (format "~A" x)))
   (exit -1))
 
+(define (string->list_ str n)
+  (if (eq? n 0)
+    (cons (string-ref str n) '())
+    (cons (string-ref str n) (string->list_ str (sub1 n)))))
+(define (string->list str)
+  (reverse (string->list_ str (sub1 (string-length str)))))
+
+(define (list->string lst)
+  (if (eq? lst '())
+    ""
+    (string-append (any->string (car lst))
+		   (list->string (cdr lst)))))
+    
+
