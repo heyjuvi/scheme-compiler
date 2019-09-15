@@ -48,11 +48,10 @@
 (display bool-to-fixnum-conversion-works)
 (newline)
 
-(and (and (and fixnum-is-fixnum
-              no-fixnum-is-no-fixnum)
-          (and fixnum-equality-works
-               fixnum-inequality-works))
-     (and (and char-to-fixnum-conversion-works
-	       #t) ;unicode-char-to-fixnum-conversion-works))
-	  bool-to-fixnum-conversion-works))
+(and fixnum-is-fixnum
+     no-fixnum-is-no-fixnum
+     fixnum-equality-works
+     fixnum-inequality-works
+     char-to-fixnum-conversion-works
+     bool-to-fixnum-conversion-works)
 

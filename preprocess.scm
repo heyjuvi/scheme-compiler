@@ -3,26 +3,47 @@
   (set! id-counter (add1 id-counter))
   (string->symbol (format "id~A" (list id-counter))))
 
+(define (escape-id x)
+  (let ((x-lst (string->list (symbol->string x))))
+    (string->symbol
+      (foldr (lambda (s1 s2) (string-append s1 s2))
+	(map (lambda (c)
+	       (cond
+		 ((eq? c #\-) "_dash_")
+		 ((eq? c #\!) "_exclmark_")
+		 ((eq? c #\?) "_questmark_")
+		 ((eq? c #\*) "_star_")
+		 ((eq? c #\>) "_greater_")
+		 ((eq? c #\<) "_greater_")
+		 ((eq? c #\=) "_equal_")
+		 (else (char->string c))))
+	     x-lst)))))
+
 (define (preprocess x)
   (cond
+    ((let*? x)
+     (preprocess (preprocess-let*->let x)))
     ((let? x)
-     (make-let (let-bindings x)
+     (let ((new-bindings (map (lambda (p)
+                                (list (escape-id (let-binding-var p))
+                                      (preprocess (let-binding-val p))))
+                              (let-bindings x))))
+     (make-let new-bindings
 	       (make-body
 		 (make-begin
 		   (make-body
 		     (preprocess-vars->refs
 		       (preprocess (let-body x))
-		       (let-bindings-vars x)))))))
-    ((let*? x)
-     (preprocess-let*->let x))
+		       (map let-binding-var new-bindings))))))))
     ((lambda? x)
-     (make-lambda (lambda-args x)
-		  (make-body
-		    (make-begin
-		      (make-body
-			(preprocess-vars->refs
-			  (preprocess (lambda-body x))
-			  (lambda-args x)))))))
+     (let ((new-args (map escape-id (lambda-args x))))
+       (make-lambda new-args
+		    (make-body
+		      (make-begin
+		        (make-body
+			  (preprocess-vars->refs
+			    (preprocess (lambda-body x))
+			    new-args)))))))
     ((if? x)
      (make-if (preprocess (if-test x))
 	      (preprocess (if-conseq x))
@@ -33,7 +54,7 @@
      (cond
        ((define-function? x)
 	(preprocess
-          (make-define-var (define-function-name x)
+          (make-define-var (escape-id (define-function-name x))
 			   (make-body
 			     (make-lambda
 			       (define-function-args x)
@@ -41,7 +62,7 @@
 				 (make-begin
 				   (define-body x))))))))
        ((define-var? x)
-	(make-define-var (define-id x)
+	(make-define-var (escape-id (define-id x))
 			 (make-body
 			   (preprocess
 			     (car (define-body x))))))
@@ -50,20 +71,37 @@
     ((cond? x)
      (preprocess (preprocess-cond->if (cond-clauses x))))
     ((immediate? x) x)
-    ((string? x) x)
-    ((primcall? x)
+    ((string? x) (debug x) x)
+    ((or? x)
+     (preprocess (preprocess-unfold-or (cdr x))))
+    ((and? x)
+     (preprocess (preprocess-unfold-and (cdr x))))
+    ((or (primcall? x) (set!? x))
+     (debug (car x))
      (cons (car x) (map preprocess (cdr x))))
     ((list-primcall? x)
      (preprocess-list->cons (map preprocess (cdr x))))
     ((quote? x)
      (preprocess-quote (quote-content x)))
     ((quasiquote? x)
-     (map preprocess (preprocess-quasiquote 1 (quasiquote-content x))))
+     (map preprocess
+	  (preprocess-quasiquote 1 (quasiquote-content x))))
     ((list? x)
      (map preprocess x))
-    ((var? x) x)
+    ((var? x)
+     (escape-id x))
     (else
       (error "Not preprocessable: " x))))
+
+(define (preprocess-unfold-and x)
+  (if (equal? (length x) 2)
+    (make-if (car x) (cadr x) #f)
+    (make-if (car x) (preprocess-unfold-and (cdr x)) #f)))
+
+(define (preprocess-unfold-or x)
+  (if (equal? (length x) 2)
+    (make-if (car x) #t (cadr x))
+    (make-if (car x) #t (preprocess-unfold-or (cdr x)))))
 
 (define (preprocess-let*->let x)
   (let ((bindings (let-bindings x)))
@@ -157,13 +195,17 @@
     ((unquote? content)
      (if (equal? n 1)
        (preprocess (unquote-content content))
-       (list 'list
+       (list 'cons
 	     (make-quote 'unquote)
-	     (preprocess-quasiquote (sub1 n) (unquote-content content)))))
+	     (list 'cons
+	           (preprocess-quasiquote (sub1 n) (unquote-content content))
+		   '()))))
     ((quasiquote? content)
-     (list 'list
+     (list 'cons
 	   (make-quote 'quasiquote)
-	   (preprocess-quasiquote (add1 n) (quasiquote-content content))))
+	   (list 'cons
+                 (preprocess-quasiquote (add1 n) (quasiquote-content content))
+		 '())))
     ((pair? content)
      `(cons ,(preprocess-quasiquote n (car content))
 	    ,(preprocess-quasiquote n (cdr content))))

@@ -18,7 +18,9 @@ define i64 @prim_string_length(i64 %string) {
 	%length = call i64 @strlen(i8* %string_i8_ptr);
 	; set the fixnum tag
         %fixnum_tag = load i64, i64* @prim_fixnum_tag
-        %tagged_length = or i64 %length, %fixnum_tag
+        %fixnum_shift = load i64, i64* @prim_fixnum_shift
+	%shifted_length = shl i64 %length, %fixnum_shift
+        %tagged_length = or i64 %shifted_length, %fixnum_tag
 	; return the length
 	ret i64 %tagged_length
 }
@@ -55,6 +57,28 @@ equal:
 not_equal:
 	%res_not_equal = load i64, i64* @prim_bool_false
 	ret i64 %res_not_equal
+}
+
+define i64 @prim_string_ref(i64 %string, i64 %index) {
+	; remove the tag from the string
+        %string_tag = load i64, i64* @prim_string_tag
+        %string_addr = xor i64 %string, %string_tag
+	; make a pointer from it
+	%string_ptr = inttoptr i64 %string_addr to i64*
+	%string_i8_ptr = bitcast i64* %string_ptr to i8*
+	; unshift the index
+        %fixnum_shift = load i64, i64* @prim_fixnum_shift
+        %unshifted_index = lshr i64 %index, %fixnum_shift
+	; get the element
+	%char_ptr = getelementptr i8, i8* %string_i8_ptr, i64 %unshifted_index
+	%char = load i8, i8* %char_ptr
+	%ext_char = zext i8 %char to i64
+	%char_shift = load i64, i64* @prim_char_shift
+	%shifted_char = shl i64 %ext_char, %char_shift
+	; tag the char and return it
+	%char_tag = load i64, i64* @prim_char_tag
+	%tagged_char = or i64 %shifted_char, %char_tag
+	ret i64 %tagged_char
 }
 
 define i64 @prim_string_append(i64 %string1, i64 %string2) {
@@ -142,6 +166,17 @@ define i64 @prim_char_to_string(i64 %char) {
 	ret i64 %tagged_string
 }
 
+define i64 @prim_symbol_to_string(i64 %symbol) {
+	; get the symbol and the string tag
+	%symbol_tag = load i64, i64* @prim_symbol_tag
+	%string_tag = load i64, i64* @prim_string_tag
+	; remove the tag
+	%symbol_addr = xor i64 %symbol, %symbol_tag
+	; add the string tag and return the tagged string
+	%tagged_string = or i64 %symbol_addr, %string_tag
+	ret i64 %tagged_string
+}
+
 ; TODO: empty list, pair, vector, symbol, closure
 define i64 @prim_any_to_string(i64 %any) {
 test_fixnum:
@@ -176,9 +211,18 @@ test_string:
 	%string_mask = load i64, i64* @prim_heap_mask
 	%any_string_tag = and i64 %any, %string_mask
 	%string_test = icmp eq i64 %any_string_tag, %string_tag
-	br i1 %string_test, label %string_to_string, label %error
+	br i1 %string_test, label %string_to_string, label %test_symbol
 string_to_string:
 	ret i64 %any
+test_symbol:
+	%symbol_tag = load i64, i64* @prim_symbol_tag
+	%symbol_mask = load i64, i64* @prim_heap_mask
+	%any_symbol_tag = and i64 %any, %symbol_mask
+	%symbol_test = icmp eq i64 %any_symbol_tag, %symbol_tag
+	br i1 %symbol_test, label %symbol_to_string, label %error
+symbol_to_string:
+	%symbol_string = call i64 @prim_symbol_to_string(i64 %any)
+	ret i64 %symbol_string
 error:
 	%res_false = load i64, i64* @prim_bool_false
 	ret i64 %res_false

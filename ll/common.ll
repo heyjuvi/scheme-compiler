@@ -27,6 +27,8 @@ declare i64 @snprintf(i8*, i64, i8*, ...)
 declare i64* @fopen(i8*, i8*)
 declare i64 @fgetc(i64*)
 
+declare void @exit(i8)
+
 ; basic heap management
 @heap_base_ptr = global i8* zeroinitializer, align 8
 @heap_index = global i64 0, align 8
@@ -68,10 +70,10 @@ declare i64 @fgetc(i64*)
 
 define i64 @___reserved_main() {
 	; allocate the heap and store its pointer
-	%heap_ptr = call i8* @calloc(i32 10000, i32 8)
+	%heap_ptr = call i8* @calloc(i32 50000000, i32 8)
 	store i8* %heap_ptr, i8** @heap_base_ptr, align 8
 	; allocate the symbols and store its pointer
-	%symbols_ptr = call i8* @calloc(i32 1000, i32 8)
+	%symbols_ptr = call i8* @calloc(i32 1000000, i32 8)
 	store i8* %symbols_ptr, i8** @symbols_base_ptr, align 8
 	; call the main program
 	%res = call i64 @scheme_main()
@@ -149,6 +151,16 @@ args_list_loop:
 return_list:
 	%res_pair = load i64, i64* %current_pair_ptr
 	ret i64 %res_pair
+}
+
+define i64 @prim_process_exit(i64 %exit_code) {
+	; get the fixnum shift
+	%fixnum_shift = load i64, i64* @prim_fixnum_shift
+	; remove the shift, truncate and call exit
+	%unshifted_exit_code = lshr i64 %exit_code, %fixnum_shift
+	%truncated_exit_code = trunc i64 %exit_code to i8
+	call void @exit(i8 %truncated_exit_code)
+	ret i64 0
 }
 
 define i64 @___reserved_has_tag(i64* %tag_ptr, i64* %mask_ptr, i64 %value) {

@@ -16,9 +16,9 @@
 (define (any->string x)
   (cond
     ((string? x) x)
+    ((symbol? x) (symbol->string x))
     ((fixnum? x) (fixnum->string x))
     ((char? x) (char->string x))
     ((boolean? x) (boolean->string x))
     ((null? x) "()")))
 
-(define (caddddr x) (list-ref x 4))

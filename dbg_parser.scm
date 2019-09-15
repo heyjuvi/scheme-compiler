@@ -144,7 +144,7 @@
           ((string-token? next-token)
            (cadr next-token))
           (else
-	    (debug (format "Line ~A: " (list current-line)))
+	    (display (format "Line ~A: " (list current-line)))
             (error "Unknown token -- PARSE-EXPR" next-token)))))
 
 (define (parse-list collector)
@@ -280,15 +280,12 @@
 
 ; TODO: replace second-char wtih current-char?
 (define (read-identifier collector second-char)
-  (debug "entering read-identifier")
   (if (or (alphabetic? second-char)
           (or (numeric? second-char)
               (special? second-char)))
-    (begin
-      (debug "is alphanum or special")
-      (read-identifier (string-append collector
-                                      (char->string second-char))
-                       (next-char)))
+    (read-identifier (string-append collector
+                                    (char->string second-char))
+                     (next-char))
     collector))
 
 (define (print-ast ast indent)
@@ -296,15 +293,15 @@
     (lambda (x)
       (if (list? x)
         (begin
-          (debug indent)
-          (debug " \\")
-          (debug-newline)
+          (display indent)
+          (display " -")
+          (newline)
           (print-ast x (string-append indent " ")))
         (begin
-          (debug indent)
-          (debug "| ")
-          (debug x)
-          (debug-newline))))
+          (display indent)
+          (display "| ")
+          (display x)
+          (newline))))
     ast))
 
 

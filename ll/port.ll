@@ -10,6 +10,8 @@
 @prim_port_write = private constant [2 x i8] c"w\00", align 8
 @prim_port_read_write = private constant [3 x i8] c"r+\00", align 8
 
+@prim_port_eof_object = global i64 16776975, align 8
+
 define i64 @___reserved_port_open_file(i64 %path, i64* %type_ptr) {
 	; create the port
 	%port = call i64 @prim_vector_init(i64 2)
@@ -66,15 +68,28 @@ define i64 @prim_port_open_i_o_file(i64 %path) {
 	ret i64 %res
 }
 
+define i64 @prim_port_is_eof_object(i64 %char) {
+	%eof_object = load i64, i64* @prim_port_eof_object
+	%res = call i64 @prim_generic_eq(i64 %char, i64 %eof_object)
+	ret i64 %res
+}
+
 define i64 @prim_port_read_char(i64 %port) {
-	; get the char tag and shift
+	; get the char tag, shift and the eof object
 	%char_tag = load i64, i64* @prim_char_tag
 	%char_shift = load i64, i64* @prim_char_shift
+	%eof_object = load i64, i64* @prim_port_eof_object
 	; get the file handle
 	%file_handle_addr = call i64 @prim_vector_ref(i64 %port, i64 1)
 	%file_handle_ptr = inttoptr i64 %file_handle_addr to i64*
 	; read a char
 	%unshifted_char = call i64 @fgetc(i64* %file_handle_ptr)
+	; TODO: this works only on linux?
+	%test_eof = icmp uge i64 %unshifted_char, 65535
+	br i1 %test_eof, label %return_eof_object, label %return_char
+return_eof_object:
+	ret i64 %eof_object
+return_char:
 	%char = shl i64 %unshifted_char, %char_shift
 	%tagged_char = or i64 %char, %char_tag
 	ret i64 %tagged_char

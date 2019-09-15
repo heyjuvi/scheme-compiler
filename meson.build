@@ -18,6 +18,7 @@ source_files = files([
   'closure-conversion.scm',
   'codegen.scm'
 ])
+
 combined_source_file = 'combined.scm'
 c_source_file = 'combined.c'
 
@@ -26,7 +27,6 @@ combined_source = custom_target('combined',
   input : source_files,
   command : [ source_combiner, '@INPUT@' ],
   capture : true)
-
 c_source = custom_target('c',
   output : c_source_file,
   input : combined_source,
@@ -40,3 +40,4 @@ slang_compiler = executable('slang',
   include_directories : '/usr/include/chicken/')
 
 subdir('tests')
+

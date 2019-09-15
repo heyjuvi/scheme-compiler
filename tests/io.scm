@@ -12,4 +12,19 @@
 (display content-is-correct)
 (newline)
 
-content-is-correct
+(define (find-eof-object n)
+  (let ((char (read-char my-source)))
+    (if (eof-object? char)
+      #t
+      (if (equal? n 0)
+        #f
+        (find-eof-object (sub1 n))))))
+(define found-eof-object
+  (find-eof-object 2000))
+
+(display "Found the eof object?")
+(display found-eof-object)
+(newline)
+
+(and content-is-correct
+     found-eof-object)
