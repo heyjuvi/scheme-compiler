@@ -120,17 +120,48 @@ get_false_string:
 	ret i64 %tagged_false_string_addr
 }
 
-; TODO: char, empty list, pair, vector, symbol, closure
+define i64 @prim_char_to_string(i64 %char) {
+	; get char shift
+	%char_shift = load i64, i64* @prim_char_shift
+	%string_tag = load i64, i64* @prim_string_tag
+	; put the array onto the heap
+	%unshifted_char = lshr i64 %char, %char_shift
+	%tmp_char1 = lshr i64 %unshifted_char, 16
+	%char1 = trunc i64 %tmp_char1 to i8
+	%tmp_char2 = lshr i64 %unshifted_char, 8
+	%char2 = trunc i64 %tmp_char2 to i8
+	%char3 = trunc i64 %unshifted_char to i8
+	; TODO: not sure, if this works out correctly
+	%string = call i64 @___reserved_heap_store_i8(i8 %char3)
+	call i64 @___reserved_heap_store_i8(i8 %char2)
+	call i64 @___reserved_heap_store_i8(i8 %char1)
+	call i64 @___reserved_heap_store_i8(i8 0)
+	call i64 @___reserved_heap_align()
+	; tag the string and return it
+	%tagged_string = or i64 %string, %string_tag
+	ret i64 %tagged_string
+}
+
+; TODO: empty list, pair, vector, symbol, closure
 define i64 @prim_any_to_string(i64 %any) {
 test_fixnum:
 	%fixnum_tag = load i64, i64* @prim_fixnum_tag
 	%fixnum_mask = load i64, i64* @prim_fixnum_mask
 	%any_fixnum_tag = and i64 %any, %fixnum_mask
 	%fixnum_test = icmp eq i64 %any_fixnum_tag, %fixnum_tag
-	br i1 %fixnum_test, label %fixnum_to_string, label %test_bool
+	br i1 %fixnum_test, label %fixnum_to_string, label %test_char
 fixnum_to_string:
 	%fixnum_string = call i64 @prim_fixnum_to_string(i64 %any)
 	ret i64 %fixnum_string
+test_char:
+	%char_tag = load i64, i64* @prim_char_tag
+	%char_mask = load i64, i64* @prim_char_mask
+	%any_char_tag = and i64 %any, %char_mask
+	%char_test = icmp eq i64 %any_char_tag, %char_tag
+	br i1 %char_test, label %char_to_string, label %test_bool
+char_to_string:
+	%char_string = call i64 @prim_char_to_string(i64 %any)
+	ret i64 %char_string
 test_bool:
 	%bool_tag = load i64, i64* @prim_bool_tag
 	%bool_mask = load i64, i64* @prim_bool_mask

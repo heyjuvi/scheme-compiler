@@ -19,11 +19,13 @@
 declare i8* @calloc(i32, i32)
 declare void @free(i8*)
 
-declare i64 @puts(i8*);
-declare i64 @putchar(i8);
-declare i64 @strlen(i8*);
-declare i64 @strcmp(i8*, i8*);
-declare i64 @snprintf(i8*, i64, i8*, ...);
+declare i64 @puts(i8*)
+declare i64 @putchar(i8)
+declare i64 @strlen(i8*)
+declare i64 @strcmp(i8*, i8*)
+declare i64 @snprintf(i8*, i64, i8*, ...)
+declare i64* @fopen(i8*, i8*)
+declare i64 @fgetc(i64*)
 
 ; basic heap management
 @heap_base_ptr = global i8* zeroinitializer, align 8

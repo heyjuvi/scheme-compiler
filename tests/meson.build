@@ -8,7 +8,8 @@ std_source_files = files([
   '../ll/closure.ll',
   '../ll/string.ll',
   '../ll/symbol.ll',
-  '../ll/generic.ll'
+  '../ll/generic.ll',
+  '../ll/port.ll'
 ])
 
 tests = [
@@ -25,6 +26,7 @@ tests = [
   [ 'Testing the let expression behaviour', 'let.scm' ],
   [ 'Testing the cond expression behaviour', 'cond.scm' ],
   [ 'Testing the set! expression behaviour', 'set.scm' ],
+  [ 'Testing the input/output facilities', 'io.scm' ],
 ]
 
 #driver_source_file = 'driver.c'
