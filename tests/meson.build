@@ -29,13 +29,6 @@ tests = [
   [ 'Testing the input/output facilities', 'io.scm' ],
 ]
 
-#driver_source_file = 'driver.c'
-#driver_object_file = 'driver.c.o'
-#driver_object = custom_target('driver',
-#  output : driver_object_file,
-#  input : driver_source_file,
-#  command : [ c_compiler, '@INPUT@', '-m64', '-c', '-g', '-o', '@OUTPUT@' ])
-
 foreach test_data : tests
   test_description = test_data[0]
   test_source_filename = test_data[1]
@@ -92,9 +85,34 @@ combined_self_ll_source = custom_target('combined_slang_ll-target',
 combined_self_ll_object = custom_target('combined_slang_object-target',
   output : 'slang.o',
   input : combined_self_ll_source,
-  command : [ llvm_ir_compiler, '@INPUT@', '--filetype=obj', '-o', '@OUTPUT@' ])
-self_executable = executable('slang.elf',
+  command : [ llvm_ir_compiler, '@INPUT@', '--filetype=obj', '-O3', '-o', '@OUTPUT@' ])
+self_executable = executable('slang',
   sources : [ combined_self_ll_object ],
-  c_args : [ '-m64', '-g' ],
+  c_args : [ '-m64', '-O3', '-g' ],
   link_args : [ '-no-pie' ])
+
+#foreach test_data : tests
+#  test_description = test_data[0]
+#  test_source_filename = test_data[1]
+#
+#  test_ll_source = custom_target(test_source_filename + '_ll-target-self',
+#    output : test_source_filename + '.self.ll',
+#    input : test_source_filename,
+#    command : [ self_executable, '@INPUT@' ],
+#    capture : true)
+#  combined_test_ll_source = custom_target(test_source_filename + '_combined_test_ll-target-self',
+#    output : test_source_filename + '.self.combined.ll',
+#    input : std_source_files + [ test_ll_source ],
+#    command : [ source_combiner, '@INPUT@' ],
+#    capture: true)
+#  combined_test_ll_object = custom_target(test_source_filename + '_combined_test_object-target-self',
+#    output : test_source_filename + '.self.o',
+#    input : combined_test_ll_source,
+#    command : [ llvm_ir_compiler, '@INPUT@', '--filetype=obj', '-o', '@OUTPUT@' ])
+#  test_executable = executable(test_source_filename + '.self.elf',
+#    sources : [ combined_test_ll_object ],
+#    c_args : [ '-m64', '-g' ],
+#    link_args : [ '-no-pie' ])
+#  test(test_description, test_executable)
+#endforeach
 

@@ -100,10 +100,12 @@
     0
     (add1 (length (cdr lst)))))
 
-(define (reverse lst)
+(define (reverse_ lst rev)
   (if (null? lst)
-    '()
-    (append (reverse (cdr lst)) (list (car lst)))))
+    rev
+    (reverse_ (cdr lst) (cons (car lst) rev))))
+(define (reverse lst)
+  (reverse_ lst '()))
 
 (define (iota_ n)
   (if (equal? n 0)
@@ -112,35 +114,32 @@
 (define (iota n)
   (reverse (iota_ n)))
 
-(define (format_ str-lst lst)
+(define (format_ str n len lst res)
   (cond
-    ((< (length str-lst) 2) str-lst)
-    ((null? lst) str-lst)
+    ((eq? n len) res)
+    ((and (<= n (- len 2))
+          (eq? (string-ref str n) #\~)
+          (eq? (string-ref str (add1 n)) #\A))
+     (format_ str (+ n 2) len (cdr lst)
+       (string-append res (any->string (car lst)))))
     (else
-      (let ((first-char (car str-lst))
-	    (second-char (cadr str-lst))
-	    (rest-str-lst (cddr str-lst)))
-        (if (and (equal? first-char #\~)
-	         (or (equal? second-char #\A)
-		     (equal? second-char #\a)))
-          (append (string->list (any->string (car lst)))
-	          (format_ rest-str-lst (cdr lst)))
-	  (cons (car str-lst)
-	        (format_ (cdr str-lst) lst)))))))
+      (format_ str (+ n 1) len lst
+        (string-append res (char->string (string-ref str n)))))))
 (define (format str lst)
-  (list->string (format_ (string->list str) lst)))
+  (format_ str 0 (string-length str) lst ""))
 
 (define (error str x)
   (display (string-append (string-append str ": ")
 	   (format "~A" (list x))))
   (exit -1))
 
-(define (string->list_ str n)
-  (if (eq? n 0)
-    (cons (string-ref str n) '())
-    (cons (string-ref str n) (string->list_ str (sub1 n)))))
+(define (string->list_ str n len)
+  (if (eq? n len)
+    '()
+    (cons (string-ref str n)
+          (string->list_ str (add1 n) len))))
 (define (string->list str)
-  (reverse (string->list_ str (sub1 (string-length str)))))
+  (string->list_ str 0 (string-length str)))
 
 (define (list->string lst)
   (if (eq? lst '())

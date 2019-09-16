@@ -61,13 +61,29 @@
 (display empty-list-is-null)
 (newline)
 
-(and (and pairs-are-equal
-          lists-are-equal)
-     (and (and (and pair-is-pair
-	            no-pair-is-no-pair)
-	       list-is-pair)
-	  (and (and list-is-list
-	            no-list-is-no-list)
-               (and pair-is-no-list
-		    empty-list-is-null))))
+(define (own-reverse_ lst rev)
+  (if (null? lst)
+    rev
+    (own-reverse_ (cdr lst) (cons (car lst) rev))))
+(define (own-reverse lst)
+  (own-reverse_ lst '()))
+
+(define reversing-list-works
+  (and (equal? (own-reverse '(1 2 3 4)) '(4 3 2 1))
+       (equal? (own-reverse '()) '())))
+
+(display "Reversing a list works? (constructing own reverse)")
+(display reversing-list-works)
+(newline)
+
+(and pairs-are-equal
+     lists-are-equal
+     pair-is-pair
+     no-pair-is-no-pair
+     list-is-pair
+     list-is-list
+     no-list-is-no-list
+     pair-is-no-list
+     empty-list-is-null
+     reversing-list-works)
 
