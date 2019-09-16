@@ -19,7 +19,7 @@
 declare i8* @calloc(i32, i32)
 declare void @free(i8*)
 
-declare i64 @puts(i8*)
+declare i64 @printf(i8*, ...)
 declare i64 @putchar(i8)
 declare i64 @strlen(i8*)
 declare i64 @strcmp(i8*, i8*)

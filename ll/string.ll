@@ -3,6 +3,7 @@
 ; (until 8 bytes are filled because of alignment)
 
 @prim_fixnum_format = private constant [3 x i8] c"%d\00", align 8
+@prim_string_format = private constant [3 x i8] c"%s\00", align 8
 
 @prim_bool_true_string = private constant [3 x i8] c"#t\00", align 8
 @prim_bool_false_string = private constant [3 x i8] c"#f\00", align 8
@@ -237,8 +238,11 @@ define i64 @prim_display(i64 %any) {
 	; make a pointer from it
 	%string_ptr = inttoptr i64 %string_addr to i64*
 	%string_i8_ptr = bitcast i64* %string_ptr to i8*
-	; call puts
-	call i64 @puts(i8* %string_i8_ptr)
+	; get the string format for printf
+	%string_format_bounds = getelementptr inbounds [3 x i8], [3 x i8]* @prim_string_format, i64 0
+	%string_format = bitcast [3 x i8]* %string_format_bounds to i8*
+	; call printf
+	call i64 (i8*, ...) @printf(i8* %string_format, i8* %string_i8_ptr)
 	; just return true, no error treatment at the moment
 	%res_true = load i64, i64* @prim_bool_true
 	ret i64 %res_true
