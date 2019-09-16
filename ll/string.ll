@@ -4,9 +4,12 @@
 
 @prim_fixnum_format = private constant [3 x i8] c"%d\00", align 8
 @prim_string_format = private constant [3 x i8] c"%s\00", align 8
+@prim_pair_format = private constant [10 x i8] c"(%s . %s)\00", align 8
 
 @prim_bool_true_string = private constant [3 x i8] c"#t\00", align 8
 @prim_bool_false_string = private constant [3 x i8] c"#f\00", align 8
+
+@prim_pair_empty_list_string = private constant [3 x i8] c"()\00", align 8
 
 define i64 @prim_string_length(i64 %string) {
 	; remove the tag
@@ -145,6 +148,15 @@ get_false_string:
 	ret i64 %tagged_false_string_addr
 }
 
+define i64 @prim_empty_list_to_string() {
+        %string_tag = load i64, i64* @prim_string_tag
+        %empty_list_string_bounds = getelementptr inbounds [3 x i8], [3 x i8]* @prim_pair_empty_list_string, i64 0
+        %empty_list_string_ptr = bitcast [3 x i8]* %empty_list_string_bounds to i64*
+        %empty_list_string_addr = ptrtoint i64* %empty_list_string_ptr to i64
+        %tagged_empty_list_string_addr = or i64 %empty_list_string_addr, %string_tag
+        ret i64 %tagged_empty_list_string_addr
+}
+
 define i64 @prim_char_to_string(i64 %char) {
 	; get char shift
 	%char_shift = load i64, i64* @prim_char_shift
@@ -167,6 +179,59 @@ define i64 @prim_char_to_string(i64 %char) {
 	ret i64 %tagged_string
 }
 
+define i64 @prim_pair_to_string(i64 %pair) {
+	; get the car and cdr
+	%car = call i64 @prim_pair_car(i64 %pair)
+	%cdr = call i64 @prim_pair_cdr(i64 %pair)
+	; make strings from both
+	%car_string = call i64 @prim_any_to_string(i64 %car)
+	%cdr_string = call i64 @prim_any_to_string(i64 %cdr)
+	; get the lengths
+	%car_string_len = call i64 @prim_string_length(i64 %car_string)
+	%cdr_string_len = call i64 @prim_string_length(i64 %cdr_string)
+	; remove the fixnum shift
+	%fixnum_shift = load i64, i64* @prim_fixnum_shift
+	%unshifted_car_string_len = lshr i64 %car_string_len, %fixnum_shift
+	%unshifted_cdr_string_len = lshr i64 %cdr_string_len, %fixnum_shift
+	; compute the new strings length (the %s do not contribute)
+	%len_with_car_string = add i64 6, %unshifted_car_string_len
+	%string_len = add i64 %len_with_car_string, %unshifted_cdr_string_len
+	; setup enough heap storage for the string
+	%string_addr = call i64 @___reserved_heap_store_i64(i64 0)
+	%start_loops = udiv i64 %string_len, 4
+	%loops_ptr = alloca i64, align 8
+	store i64 %start_loops, i64* %loops_ptr
+	br label %reserve_memory
+reserve_memory:
+	%loops = load i64, i64* %loops_ptr
+	%new_loops = sub i64 %loops, 1
+	store i64 %new_loops, i64* %loops_ptr
+	call i64 @___reserved_heap_store_i64(i64 0)
+	%test_zero = icmp eq i64 %new_loops, 0
+	br i1 %test_zero, label %make_string, label %reserve_memory
+make_string:
+	; get the string tag
+	%string_tag = load i64, i64* @prim_string_tag
+	; get the string format for snprintf
+	%pair_format_bounds = getelementptr inbounds [10 x i8], [10 x i8]* @prim_pair_format, i64 0
+	%pair_format = bitcast [10 x i8]* %pair_format_bounds to i8*
+	; get the pointer for string
+	%string_i64_ptr = inttoptr i64 %string_addr to i64*
+	%string_ptr = bitcast i64* %string_i64_ptr to i8*
+	; get the car and cdr string pointers
+	%untagged_car_string = xor i64 %car_string, %string_tag
+	%untagged_cdr_string = xor i64 %cdr_string, %string_tag
+	%car_string_i64_ptr = inttoptr i64 %untagged_car_string to i64*
+	%cdr_string_i64_ptr = inttoptr i64 %untagged_cdr_string to i64*
+	%car_string_ptr = bitcast i64* %car_string_i64_ptr to i8*
+	%cdr_string_ptr = bitcast i64* %cdr_string_i64_ptr to i8*
+	; call snprintf
+	call i64 (i8*, i64, i8*, ...) @snprintf(i8* %string_ptr, i64 %string_len, i8* %pair_format, i8* %car_string_ptr, i8* %cdr_string_ptr)
+	; tag the string
+	%tagged_string = or i64 %string_addr, %string_tag
+	ret i64 %tagged_string
+}
+
 define i64 @prim_symbol_to_string(i64 %symbol) {
 	; get the symbol and the string tag
 	%symbol_tag = load i64, i64* @prim_symbol_tag
@@ -178,7 +243,8 @@ define i64 @prim_symbol_to_string(i64 %symbol) {
 	ret i64 %tagged_string
 }
 
-; TODO: empty list, pair, vector, symbol, closure
+; TODO: why is empty list not working?
+; TODO: vector, closure
 define i64 @prim_any_to_string(i64 %any) {
 test_fixnum:
 	%fixnum_tag = load i64, i64* @prim_fixnum_tag
@@ -203,10 +269,26 @@ test_bool:
 	%bool_mask = load i64, i64* @prim_bool_mask
 	%any_bool_tag = and i64 %any, %bool_mask
 	%bool_test = icmp eq i64 %any_bool_tag, %bool_tag
-	br i1 %bool_test, label %bool_to_string, label %test_string
+	br i1 %bool_test, label %bool_to_string, label %test_empty_list
 bool_to_string:
 	%bool_string = call i64 @prim_bool_to_string(i64 %any)
 	ret i64 %bool_string
+test_empty_list:
+	%empty_list = load i64, i64* @prim_pair_empty_list
+	%empty_list_test = icmp eq i64 %any, %empty_list
+	br i1 %empty_list_test, label %empty_list_to_string, label %test_pair
+empty_list_to_string:
+	%empty_list_string = call i64 @prim_empty_list_to_string()
+	ret i64 %empty_list_string
+test_pair:
+	%pair_tag = load i64, i64* @prim_pair_tag
+	%pair_mask = load i64, i64* @prim_heap_mask
+	%any_pair_tag = and i64 %any, %pair_mask
+	%pair_test = icmp eq i64 %any_pair_tag, %pair_tag
+	br i1 %pair_test, label %pair_to_string, label %test_string
+pair_to_string:
+	%pair_string = call i64 @prim_pair_to_string(i64 %any)
+	ret i64 %pair_string
 test_string:
 	%string_tag = load i64, i64* @prim_string_tag
 	%string_mask = load i64, i64* @prim_heap_mask

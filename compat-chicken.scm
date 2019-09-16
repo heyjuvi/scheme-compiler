@@ -20,5 +20,6 @@
     ((fixnum? x) (fixnum->string x))
     ((char? x) (char->string x))
     ((boolean? x) (boolean->string x))
-    ((null? x) "()")))
+    ((null? x) "'()")
+    ((pair? x) (format "(~A . ~A)" (list (any->string (car x)) (any->string (cdr x)))))))
 

@@ -25,16 +25,12 @@
 (define (read-token)
   (let ((first-char current-char)
         (second-char (next-char)))
-    (debug (format "READ-TOKEN -- first = ~A" (list first-char)))
-    (debug (format "READ-TOKEN -- first = ~A" (list second-char)))
-    (debug-newline)
     (cond ((whitespace? first-char)
            (read-token))
           ((eq? first-char #\;)
            (skip-line)
            (read-token))
           ((eq? first-char #\()
-	   (debug "left paren")
            'left-parenthesis-token)
           ((eq? first-char #\))
            'right-parenthesis-token)
@@ -73,7 +69,6 @@
            (list 'string-token (read-string "")))
           ((or (alphabetic? first-char)
                (special? first-char))
-	   (debug "ident")
            (list 'identifier-token
              (read-identifier (char->string first-char)
                               second-char)))
@@ -280,15 +275,12 @@
 
 ; TODO: replace second-char wtih current-char?
 (define (read-identifier collector second-char)
-  (debug "entering read-identifier")
   (if (or (alphabetic? second-char)
           (or (numeric? second-char)
               (special? second-char)))
-    (begin
-      (debug "is alphanum or special")
-      (read-identifier (string-append collector
-                                      (char->string second-char))
-                       (next-char)))
+    (read-identifier (string-append collector
+                                    (char->string second-char))
+                     (next-char))
     collector))
 
 (define (print-ast ast indent)

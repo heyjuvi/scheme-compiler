@@ -36,6 +36,11 @@
 		  (converted-body (lambdas->closures (car (lambda-body x))))
 		  ; maybe unnecessary because of c-env unpacking?
 		  (substituted-body (free-vars->env-refs converted-body free)))
+	     (debug "LAMBDAS->CLOSURES -- Constructing new function") (debug-newline)
+	     (debug (format "  function args: ~A" (list function-args))) (debug-newline)
+	     (debug (format "  free vars: ~A" (list free))) (debug-newline)
+	     (debug (format "  converted body: ~A" (list converted-body))) (debug-newline)
+	     (debug (format "  substituted body: ~A" (list substituted-body))) (debug-newline)
              (add-function (make-function name
 					  function-args
 					  free
@@ -43,9 +48,9 @@
 	   (make-closure name arity free)))
 	((quote? x)
 	 (make-quote (lambdas->closures (quote-content x))))
-	((list? x) (debug "just a list") (map lambdas->closures x))
+	((list? x) (map lambdas->closures x))
 	((immediate? x) x)
-	((var? x) (debug "a var!") x)
+	((var? x) x)
 	((string? x) x)
 	(else (error "not implemented" (car x)))))
 
@@ -77,6 +82,9 @@
      (set-union-many (map free-vars (cdr x))))
     ((list? x) (set-union-many (map free-vars x)))
     ((and (var? x) (not (assoc x global-env)))
+     (debug "entering var") (debug-newline)
+     ;(debug "entering var (but why?)") (debug (assoc x global-env)) (debug-newline)
+     (debug "global env: ") (debug global-env) (debug-newline)
      (list x))
     (else '())))
 
@@ -101,6 +109,8 @@
     (else
       (error "free-vars->env-refs has not implemented" (car x)))))
 (define (free-vars->env-refs x free)
+  (debug "FREE-VARS->ENV-REFS -- x = ") (debug x) (debug-newline)
+  (debug "FREE-VARS->ENV-REFS -- free = ") (debug free) (debug-newline)
   (let ((reps (indexed-map (lambda (i e) `(,e list-ref c_env ,i))
 	                    free)))
     (free-vars->env-refs_ x reps)))

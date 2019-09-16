@@ -64,7 +64,7 @@ endforeach
 self_source_files = files([
   '../compat-slang.scm',
   '../dbg_misc.scm',
-  '../dbg_parser.scm',
+  '../parser.scm',
   '../forms.scm',
   '../ll.scm',
   '../preprocess.scm',

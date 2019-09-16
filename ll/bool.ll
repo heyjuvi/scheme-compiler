@@ -1,3 +1,4 @@
+; TODO: anything beside false is true!
 define i64 @prim_bool_and(i64 %x, i64 %y) {
 	%res = and i64 %x, %y
 	ret i64 %res
@@ -9,9 +10,9 @@ define i64 @prim_bool_or(i64 %x, i64 %y) {
 }
 
 define i64 @prim_bool_not(i64 %x) {
-	%bool_true = load i64, i64* @prim_bool_true
-	%test = icmp eq i64 %x, %bool_true
-	br i1 %test, label %true, label %false
+	%bool_false = load i64, i64* @prim_bool_false
+	%test = icmp eq i64 %x, %bool_false
+	br i1 %test, label %false, label %true
 true:
 	%res_false = load i64, i64* @prim_bool_false
 	ret i64 %res_false

@@ -16,7 +16,7 @@
 ;
 
 ; basic libc functions
-declare i8* @calloc(i32, i32)
+declare i8* @calloc(i64, i64)
 declare void @free(i8*)
 
 declare i64 @printf(i8*, ...)
@@ -70,10 +70,10 @@ declare void @exit(i8)
 
 define i64 @___reserved_main() {
 	; allocate the heap and store its pointer
-	%heap_ptr = call i8* @calloc(i32 50000000, i32 8)
+	%heap_ptr = call i8* @calloc(i64 1601910490, i64 8)
 	store i8* %heap_ptr, i8** @heap_base_ptr, align 8
 	; allocate the symbols and store its pointer
-	%symbols_ptr = call i8* @calloc(i32 1000000, i32 8)
+	%symbols_ptr = call i8* @calloc(i64 1000000, i64 8)
 	store i8* %symbols_ptr, i8** @symbols_base_ptr, align 8
 	; call the main program
 	%res = call i64 @scheme_main()
