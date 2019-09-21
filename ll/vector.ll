@@ -14,10 +14,10 @@ define i64 @prim_vector_init(i64 %size) {
 reserve_memory:
 	call i64 @___reserved_heap_store_i64(i64 0)
 	%counter = load i64, i64* %counter_ptr
-	%new_counter = add i64 %counter, 1
+	%new_counter = sub i64 %counter, 1
 	store i64 %new_counter, i64* %counter_ptr
 	%test = icmp eq i64 %new_counter, 0
-	br i1 %test, label %reserve_memory, label %return_vector
+	br i1 %test, label %return_vector, label %reserve_memory
 return_vector:
 	; set the vector tag
         %vector_tag = load i64, i64* @prim_vector_tag

@@ -51,7 +51,7 @@
                  ((eq? second-char #\\)
                   (list 'named-character-token (read-named-character)))
                  (else
-                   (error "Illegal #-value detected -- READ-TOKEN" first-char))))
+                   (error (format "line ~A, illegal #-value detected -- READ-TOKEN" (list current-line)) first-char))))
           ((numeric? first-char)
            (list 'integer-token
              (read-number 0 first-char 10)))
@@ -73,7 +73,7 @@
              (read-identifier (char->string first-char)
                               second-char)))
           (else
-            (error "Illegal token start detected -- READ-TOKEN" first-char)))))
+            (error (format "line ~A, illegal token start detected -- READ-TOKEN" (list current-line)) first-char)))))
 
 (define (parse in-file)
   (set! in-port (open-input-file in-file))
@@ -139,8 +139,7 @@
           ((string-token? next-token)
            (cadr next-token))
           (else
-	    (debug (format "Line ~A: " (list current-line)))
-            (error "Unknown token -- PARSE-EXPR" next-token)))))
+            (error (format "line ~A, unknown token -- PARSE-EXPR" (list current-line)) next-token)))))
 
 (define (parse-list collector)
   (let ((next-token (read-token)))
@@ -183,7 +182,7 @@
              (cons (cadr next-token)
                    collector)))
           (else
-            (error "Unknown token -- PARSE-LIST" next-token)))))
+            (error (format "line ~A, unknown token -- PARSE-LIST" (list current-line)) next-token)))))
 
 (define (whitespace? char)
   (or (eq? char #\newline)
@@ -260,10 +259,15 @@
 (define (read-string collector)
   (let ((first-char current-char))
     (cond ((eq? first-char #\\)
-           (let ((escaped-char (next-char)))
-             (read-string
-               (string-append collector
-                              (char->string (cdr (assoc escaped-char escape-symbols)))))))
+           (let* ((escaped-char (next-char))
+		  (real-char-pair (assoc escaped-char escape-symbols)))
+	     (cond
+	       ((not (eq? real-char-pair #f))
+                (read-string
+                  (string-append collector
+                                 (char->string (cdr real-char-pair)))))
+	       ((eq? escaped-char #\x)
+		(error "not implemented" escaped-char)))))
           ((eq? first-char #\")
            (next-char)
            collector)

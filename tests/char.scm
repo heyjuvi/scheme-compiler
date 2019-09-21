@@ -1,31 +1,21 @@
-(define char-is-char
-  (and (char? #\a) (char? #\b)))
+(add-test!
+  "Char is identified as such?"
+  (and (char? #\a) (char? #\b))
+  #t)
 
-(display "Char is identified as such?")
-(display char-is-char)
-(newline)
+(add-test!
+  "Fixnum is not identified as char?"
+  (char? 32)
+  #f)
 
-(define no-char-is-no-char
-  (not (char? 32)))
+(add-test!
+  "Char equality works?"
+  (equal? #\a #\a)
+  #t)
 
-(display "Fixnum is not identified as char?")
-(display no-char-is-no-char)
-(newline)
+(add-test!
+  "Char inequality works?"
+  (equal? #\a #\b)
+  #f)
 
-(define char-equality-works
-  (equal? #\a #\a))
-
-(display "Char equality works?")
-(display char-equality-works)
-(newline)
-
-(define char-inequality-works
-  (not (equal? #\a #\b)))
-
-(display "Char inequality works?")
-(display char-inequality-works)
-(newline)
-
-(and char-is-char
-     no-char-is-no-char)
-
+(test-results)

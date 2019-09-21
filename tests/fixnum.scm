@@ -1,37 +1,27 @@
-(define fixnum-is-fixnum
-  (fixnum? 23))
+(add-test!
+  "Fixnum is identified as such?"
+  (fixnum? 23)
+  #t)
 
-(display "Fixnum is identified as such?")
-(display fixnum-is-fixnum)
-(newline)
+(add-test!
+  "String is not identified as fixnum?"
+  (fixnum? "this is a string")
+  #f)
 
-(define no-fixnum-is-no-fixnum
-  (not (fixnum? "this is a string")))
+(add-test!
+  "Fixnum equality works?"
+  (equal? 42 42)
+  #t)
 
-(display "String is not identified as fixnum?")
-(display no-fixnum-is-no-fixnum)
-(newline)
+(add-test!
+  "Fixnum inequality works?"
+  (equal? 23 42)
+  #f)
 
-(define fixnum-equality-works
-  (equal? 42 42))
-
-(display "Fixnum equality works?")
-(display fixnum-equality-works)
-(newline)
-
-(define fixnum-inequality-works
-  (not (equal? 23 42)))
-
-(display "Fixnum inequality works?")
-(display fixnum-inequality-works)
-(newline)
-
-(define char-to-fixnum-conversion-works
-  (equal? (char->fixnum #\A) 65))
-
-(display "Char to fixnum conversion works?")
-(display char-to-fixnum-conversion-works)
-(newline)
+(add-test!
+  "Char to fixnum conversion works?"
+  (char->fixnum #\A)
+  65)
 
 ;(define unicode-char-to-fixnum-conversion-works
 ;  (equal? (char->fixnum #\λ) 955))
@@ -40,18 +30,10 @@
 ;(display unicode-char-to-fixnum-conversion-works)
 ;(newline)
 
-(define bool-to-fixnum-conversion-works
-  (and (equal? (boolean->fixnum #f) 0)
-       (equal? (boolean->fixnum #t) 1)))
+(add-test!
+  "Bool to fixnum conversion works?"
+  (cons (boolean->fixnum #f)
+        (boolean->fixnum #t))
+  (cons 0 1))
 
-(display "Bool to fixnum conversion works?")
-(display bool-to-fixnum-conversion-works)
-(newline)
-
-(and fixnum-is-fixnum
-     no-fixnum-is-no-fixnum
-     fixnum-equality-works
-     fixnum-inequality-works
-     char-to-fixnum-conversion-works
-     bool-to-fixnum-conversion-works)
-
+(test-results)

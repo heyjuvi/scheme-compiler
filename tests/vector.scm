@@ -1,64 +1,51 @@
 (define v (vector-init 2))
 
-(define is-zero-initialized
-  (and (equal? (vector-ref v 0) 0)
-       (equal? (vector-ref v 1) 0)))
-
-(display "Vector is zero-initialized?")
-(display is-zero-initialized)
-(newline)
+(add-test!
+  "Vector is zero-initialized?"
+  (cons (vector-ref v 0)
+        (vector-ref v 1))
+  (cons 0 0))
 
 (vector-set! v 0 2)
 (vector-set! v 1 3)
 
-(define has-been-set-correctly
-  (and (equal? (vector-ref v 0) 2)
-       (equal? (vector-ref v 1) 3)))
-
-(display "Vector elements have been set correctly?")
-(display has-been-set-correctly)
-(newline)
+(add-test!
+  "Vector elements have been set correctly?"
+  (cons (vector-ref v 0)
+        (vector-ref v 1))
+  (cons 2 3))
 
 (define some-vector (vector 23 42 1337))
-(define creating-filled-vector-works
-  (and (equal? (vector-ref some-vector 0) 23)
-       (equal? (vector-ref some-vector 2) 1337)))
 
-(display "Creating a filled vector works?")
-(display creating-filled-vector-works)
-(newline)
+(add-test!
+  "Creating a filled vector works?"
+  (list (vector-ref some-vector 0)
+        (vector-ref some-vector 1)
+        (vector-ref some-vector 2))
+  (list 23 42 1337))
 
 (vector-set! some-vector 0 1337)
 (vector-set! some-vector 2 23)
 
-(define filled-vector-can-be-changed
-  (and (equal? (vector-ref some-vector 0) 1337)
-       (equal? (vector-ref some-vector 2) 23)))
-
-(display "The filled vector can be changed?")
-(display filled-vector-can-be-changed)
-(newline)
+(add-test!
+  "The filled vector can be changed?"
+  (list (vector-ref some-vector 0)
+        (vector-ref some-vector 1)
+        (vector-ref some-vector 2))
+  (list 1337 42 23))
 
 (define single-vector (vector 42))
-(define single-element-vector-works
-  (equal? (vector-ref single-vector 0) 42))
 
-(display "Single element vector works?")
-(display single-element-vector-works)
-(newline)
+(add-test!
+  "Single element vector works?"
+  (vector-ref single-vector 0)
+  42)
 
 (vector-set! single-vector 0 23)
 
-(define single-element-vector-can-be-changed
-  (equal? (vector-ref single-vector 0) 23))
+(add-test!
+  "Single element vector can be changed?"
+  (vector-ref single-vector 0)
+  23)
 
-(display "Single element vector can be changed?")
-(display single-element-vector-can-be-changed)
-(newline)
-
-(and (and is-zero-initialized
-          has-been-set-correctly)
-     (and (and creating-filled-vector-works
-	       filled-vector-can-be-changed)
-	  (and single-element-vector-works
-	       single-element-vector-can-be-changed)))
+(test-results)

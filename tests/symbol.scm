@@ -1,90 +1,56 @@
-(define symbols-are-equal
-  (equal? 'some-symbol 'some-symbol))
+(add-test!
+  "Symbol equality works?"
+  (equal? 'some-symbol 'some-symbol)
+  #t)
 
-(display "Symbol equality works?")
-(display symbols-are-equal)
-(newline)
+(add-test!
+  "Symbol inequality works?"
+  (equal? 'some-symbol 'some-other-symbol)
+  #f)
 
-(define symbols-are-not-equal
-  (not (equal? 'some-symbol 'some-other-symbol)))
+(add-test!
+  "Symbol equality still works?"
+  (equal? 'some-other-symbol 'some-other-symbol)
+  #t)
 
-(display "Symbol inequality works?")
-(display symbols-are-not-equal)
-(newline)
+(add-test!
+  "Identical quoted lists equality works?"
+  (equal? '(a b c) '(a b c))
+  #t)
 
-(define symbols-are-still-equal
-  (equal? 'some-other-symbol 'some-other-symbol))
+(add-test!
+  "Empty lists equality works?"
+  (equal? '() '())
+  #t)
 
-(display "Symbol equality still works?")
-(display symbols-are-still-equal)
-(newline)
+(add-test!
+  "Quoted list and list of symbols is the same?"
+  '(a b c)
+  (list 'a 'b 'c))
 
-(define identical-quoted-lists-are-equal
-  (equal? '(a b c) '(a b c)))
+(add-test!
+  "Quoted lists inequality works?"
+  (equal? '(a b c) '(a b c d))
+  #f)
 
-(display "Identical quoted lists equality works?")
-(display identical-quoted-lists-are-equal)
-(newline)
+(add-test!
+  "Quasiquote works?"
+  `(2 ,(+ 2 2))
+  '(2 4))
 
-(define empty-lists-are-equal
-  (equal? '() '()))
+(add-test!
+  "Nested quasiquote works?"
+  `(`(+ 2 2) ,`(2 ,(+ 2 2)))
+  '(`(+ 2 2) (2 4)))
 
-(display "Empty lists equality works?")
-(display empty-lists-are-equal)
-(newline)
+(add-test!
+  "Symbol is identified as such?"
+  (symbol? 'hi-im-a-symbol)
+  #t)
 
-(define quoted-lists-are-equal
-  (equal? '(a b c) (list 'a 'b 'c)))
+(add-test!
+  "Bool is not identified as symbol?"
+  (symbol? #t)
+  #f)
 
-(display "Quoted lists equality works?")
-(display quoted-lists-are-equal)
-(newline)
-
-(define quoted-lists-are-not-equal
-  (not (equal? '(a b c) '(a b c d))))
-
-(display "Quoted lists inequality works?")
-(display quoted-lists-are-not-equal)
-(newline)
-
-(define quasiquote-works
-  (equal? `(2 ,(+ 2 2)) '(2 4)))
-
-(display "Quasiquote works?")
-(display quasiquote-works)
-(newline)
-
-(define nested-quasiquote-works
-  (equal? `(`(+ 2 2) ,`(2 ,(+ 2 2)))
-	  '(`(+ 2 2) (2 4))))
-
-(display "Nested quasiquote works?")
-(display nested-quasiquote-works)
-(newline)
-
-(define symbol-is-symbol
-  (symbol? 'hi-im-a-symbol))
-
-(display "Symbol is identified as such?")
-(display symbol-is-symbol)
-(newline)
-
-(define no-symbol-is-no-symbol
-  (not (symbol? #t)))
-
-(display "Bool is not identified as symbol?")
-(display no-symbol-is-no-symbol)
-(newline)
-
-(and (and symbols-are-equal
-          (and symbols-are-not-equal
-	       symbols-are-still-equal))
-     (and (and (and identical-quoted-lists-are-equal
-		    empty-lists-are-equal)
-               (and quoted-lists-are-equal
-	            quoted-lists-are-not-equal))
-	  (and (and quasiquote-works
-	            nested-quasiquote-works)
-	       (and symbol-is-symbol
-		    no-symbol-is-no-symbol))))
-
+(test-results)

@@ -14,7 +14,11 @@
 
 define i64 @___reserved_port_open_file(i64 %path, i64* %type_ptr) {
 	; create the port
-	%port = call i64 @prim_vector_init(i64 2)
+	%fixnum_shift = load i64, i64* @prim_fixnum_shift
+	%fixnum_tag = load i64, i64* @prim_fixnum_tag
+	%shifted_size = shl i64 2, %fixnum_shift
+	%tagged_size = or i64 %shifted_size, %fixnum_tag
+	%port = call i64 @prim_vector_init(i64 %tagged_size)
 	; get the type value
 	%type = load i64, i64* %type_ptr
 	; get the pointer of path
@@ -48,8 +52,12 @@ create_port:
 	%file_handle_ptr = load i64*, i64** %file_handle_ptrptr
 	%file_handle_addr = ptrtoint i64* %file_handle_ptr to i64
 	; set the ports data
-	call i64 @prim_vector_set(i64 %port, i64 0, i64 %type)
-	call i64 @prim_vector_set(i64 %port, i64 1, i64 %file_handle_addr)
+	%shifted_type_index = shl i64 0, %fixnum_shift
+	%tagged_type_index = or i64 %shifted_type_index, %fixnum_tag
+	%shifted_file_handle_index = shl i64 1, %fixnum_shift
+	%tagged_file_handle_index = or i64 %shifted_file_handle_index, %fixnum_tag
+	call i64 @prim_vector_set(i64 %port, i64 %shifted_type_index, i64 %type)
+	call i64 @prim_vector_set(i64 %port, i64 %tagged_file_handle_index, i64 %file_handle_addr)
 	ret i64 %port
 }
 
@@ -75,12 +83,16 @@ define i64 @prim_port_is_eof_object(i64 %char) {
 }
 
 define i64 @prim_port_read_char(i64 %port) {
-	; get the char tag, shift and the eof object
+	; get the fixnum and char tag and shift and the eof object
+	%fixnum_shift = load i64, i64* @prim_fixnum_shift
+	%fixnum_tag = load i64, i64* @prim_fixnum_tag
 	%char_tag = load i64, i64* @prim_char_tag
 	%char_shift = load i64, i64* @prim_char_shift
 	%eof_object = load i64, i64* @prim_port_eof_object
 	; get the file handle
-	%file_handle_addr = call i64 @prim_vector_ref(i64 %port, i64 1)
+	%shifted_file_handle_index = shl i64 1, %fixnum_shift
+	%tagged_file_handle_index = or i64 %shifted_file_handle_index, %fixnum_tag
+	%file_handle_addr = call i64 @prim_vector_ref(i64 %port, i64 %tagged_file_handle_index)
 	%file_handle_ptr = inttoptr i64 %file_handle_addr to i64*
 	; read a char
 	%unshifted_char = call i64 @fgetc(i64* %file_handle_ptr)

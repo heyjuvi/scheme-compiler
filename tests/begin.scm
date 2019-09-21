@@ -1,21 +1,16 @@
-(define single-body-correctly-evaluated
+(add-test!
+  "Single expression begin evaluates body correctly?"
   (begin
-    (equal? 2 2)))
+    (equal? 2 2))
+  #t)
 
-(display "Single expression begin evaluates body correctly?")
-(display single-body-correctly-evaluated)
-(newline)
-
-(define multiple-body-correctly-evaluated
+(add-test!
+  "Multiple expression begin evaluates body correctly?"
   (begin
     #f
     (equal? 2 2)
     (equal? 2 3)
-    (equal? 2 2)))
+    (equal? 2 2))
+  #t)
 
-(display "Multiple expression begin evaluates body correctly?")
-(display multiple-body-correctly-evaluated)
-(newline)
-
-(and single-body-correctly-evaluated
-     multiple-body-correctly-evaluated)
+(test-results)

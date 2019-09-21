@@ -1,17 +1,16 @@
-(define bool-is-bool
-  (and (boolean? #t) (boolean? #f)))
+(add-test!
+  "Bool is identified as such?"
+  (and (boolean? #t) (boolean? #f))
+  #t)
 
-(display "Bool is identified as such?")
-(display bool-is-bool)
-(newline)
+(add-test!
+  "Symbol is not identified as boolean?"
+  (boolean? 'some-symbol)
+  #f)
 
-(define no-bool-is-no-bool
-  (not (boolean? 'some-symbol)))
+(add-test!
+  "Negating 'hi' yields false?"
+  (not "hi")
+  #f)
 
-(display "Symbol is not identified as boolean?")
-(display no-bool-is-no-bool)
-(newline)
-
-(and bool-is-bool
-     no-bool-is-no-bool)
-
+(test-results)

@@ -33,9 +33,14 @@ foreach test_data : tests
   test_description = test_data[0]
   test_source_filename = test_data[1]
 
+  combined_test_source = custom_target(test_source_filename + '_combined_test-target',
+    output : test_source_filename + '.combined.scm',
+    input : [ 'test-lib.scm', test_source_filename ],
+    command : [ source_combiner, '@INPUT@' ],
+    capture : true)
   test_ll_source = custom_target(test_source_filename + '_ll-target',
     output : test_source_filename + '.ll',
-    input : test_source_filename,
+    input : combined_test_source,
     command : [ slang_compiler, '@INPUT@' ],
     capture : true)
   combined_test_ll_source = custom_target(test_source_filename + '_combined_test_ll-target',
