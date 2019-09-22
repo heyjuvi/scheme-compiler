@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.7"
-     inkscape:cx="543.77823"
-     inkscape:cy="209.25913"
+     inkscape:zoom="0.49497475"
+     inkscape:cx="521.58875"
+     inkscape:cy="98.405047"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -35,7 +35,9 @@
      inkscape:window-height="713"
      inkscape:window-x="0"
      inkscape:window-y="27"
-     inkscape:window-maximized="1" />
+     inkscape:window-maximized="1"
+     showguides="true"
+     inkscape:guide-bbox="true" />
   <metadata
      id="metadata1088">
     <rdf:RDF>
@@ -44,7 +46,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -265,14 +267,15 @@
     </g>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="98.25264"
-       y="281.4274"
-       id="text5596"><tspan
+       style="font-style:normal;font-weight:normal;font-size:10.58335686px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458392"
+       x="91.721275"
+       y="281.42804"
+       id="text5596"
+       transform="scale(1.0000023,0.99999771)"><tspan
          sodipodi:role="line"
          id="tspan5594"
-         x="98.25264"
-         y="281.4274"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16.93333244px;font-family:'Ants Valley - Personal Use';-inkscape-font-specification:'Ants Valley - Personal Use';fill:#ffffff;stroke-width:0.26458332">Compiler</tspan></text>
+         x="91.721275"
+         y="281.42804"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16.93337059px;font-family:'Ants Valley - Personal Use';-inkscape-font-specification:'Ants Valley - Personal Use';fill:#ffffff;stroke-width:0.26458392">Compiler</tspan></text>
   </g>
 </svg>
