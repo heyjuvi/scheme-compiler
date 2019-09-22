@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="400" src="https://raw.githubusercontent.com/misterdanb/scheme-compiler/master/github/logo_paths.svg">
+  <img width="400" src="./github/logo_paths.svg">
 </p>
 
 # Slang
