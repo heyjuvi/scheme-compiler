@@ -61,7 +61,7 @@ endforeach
 
 self_source_files = files([
   '../compat-slang.scm',
-  '../dbg_misc.scm',
+  '../misc.scm',
   '../parser.scm',
   '../forms.scm',
   '../ll.scm',
@@ -95,29 +95,4 @@ self_executable = executable('slang',
   sources : [ combined_self_ll_object ],
   c_args : [ '-m64', '-O3', '-g' ],
   link_args : [ '-no-pie' ])
-
-#foreach test_data : tests
-#  test_description = test_data[0]
-#  test_source_filename = test_data[1]
-#
-#  test_ll_source = custom_target(test_source_filename + '_ll-target-self',
-#    output : test_source_filename + '.self.ll',
-#    input : test_source_filename,
-#    command : [ self_executable, '@INPUT@' ],
-#    capture : true)
-#  combined_test_ll_source = custom_target(test_source_filename + '_combined_test_ll-target-self',
-#    output : test_source_filename + '.self.combined.ll',
-#    input : std_source_files + [ test_ll_source ],
-#    command : [ source_combiner, '@INPUT@' ],
-#    capture: true)
-#  combined_test_ll_object = custom_target(test_source_filename + '_combined_test_object-target-self',
-#    output : test_source_filename + '.self.o',
-#    input : combined_test_ll_source,
-#    command : [ llvm_ir_compiler, '@INPUT@', '--filetype=obj', '-o', '@OUTPUT@' ])
-#  test_executable = executable(test_source_filename + '.self.elf',
-#    sources : [ combined_test_ll_object ],
-#    c_args : [ '-m64', '-g' ],
-#    link_args : [ '-no-pie' ])
-#  test(test_description, test_executable)
-#endforeach
 

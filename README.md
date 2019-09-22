@@ -13,3 +13,10 @@ meson build
 ```
 
 You need to have the chicken scheme compiler installed to bootstrap slang.
+
+## Examples
+
+To run an example (or your own code), simply use this command:
+``` bash
+./test_slang.sh examples/romans.scm ./build/self_hosted.elf example
+```

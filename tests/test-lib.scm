@@ -1,4 +1,4 @@
-(define width 60)
+(define width 64)
 
 (define passed-text " passed")
 (define failed-text " failed")
