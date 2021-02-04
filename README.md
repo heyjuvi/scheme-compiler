@@ -21,7 +21,7 @@ To run an example (or your own code), simply use this command:
 ./test_slang.sh examples/romans.scm ./build/self_hosted.elf example
 ```
 
-# Featuers
+# Features
 
 * [x] Basic primitive such as pair, list, string, char, vector etc.
 * [x] Basic constructs such as `let`, `let*`, `cond`, `if`, `set!`, `begin` etc. (`letrec` and `set-car!`/`set-cdr!` are still missing)
