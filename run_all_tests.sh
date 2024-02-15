@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 set -e
 
 ./test_slang.sh tests/fixnum.scm $1 $2

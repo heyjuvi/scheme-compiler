@@ -81,11 +81,11 @@
      (cons (car x) (map preprocess (cdr x))))
     ((list-primcall? x)
      (preprocess-list->cons (map preprocess (cdr x))))
-    ((quote? x)
-     (preprocess-quote (quote-content x)))
-    ((quasiquote? x)
+    ((myquote? x)
+     (preprocess-myquote (myquote-content x)))
+    ((quasimyquote? x)
      (map preprocess
-	  (preprocess-quasiquote 1 (quasiquote-content x))))
+	  (preprocess-quasimyquote 1 (quasimyquote-content x))))
     ((list? x)
      (map preprocess x))
     ((var? x)
@@ -139,7 +139,7 @@
                                        arg-id-pairs)))
     ((immediate? x) x)
     ((string? x) x)
-    ((quote? x) x)
+    ((myquote? x) x)
     ; this would'nt do anything, closures do not occur at this
     ; stage of compiling
     ;((closure? x) x)
@@ -175,40 +175,40 @@
      `(cons ,(car x) ,(preprocess-list->cons (cdr x))))
     (else x)))
 
-(define (preprocess-quote content)
+(define (preprocess-myquote content)
   (cond
     ((immediate? content) content)
     ((string? content) content)
-    ; make a quote from it again at leaf level, if we finally
+    ; make a myquote from it again at leaf level, if we finally
     ; have found a symbol
-    ((symbol? content) (make-quote content))
+    ((symbol? content) (make-myquote content))
     ; recursively treat lists
     ((pair? content)
-     `(cons ,(preprocess-quote (car content))
-            ,(preprocess-quote (cdr content))))
+     `(cons ,(preprocess-myquote (car content))
+            ,(preprocess-myquote (cdr content))))
     (else
       (error "Illegal value in quote: " content))))
 
-; TODO: unquote splicing (also in the parser)
-(define (preprocess-quasiquote n content)
+; TODO: unmyquote splicing (also in the parser)
+(define (preprocess-quasimyquote n content)
   (cond
-    ((unquote? content)
+    ((unmyquote? content)
      (if (equal? n 1)
-       (preprocess (unquote-content content))
+       (preprocess (unmyquote-content content))
        (list 'cons
-	     (make-quote 'unquote)
+	     (make-myquote 'unmyquote)
 	     (list 'cons
-	           (preprocess-quasiquote (sub1 n) (unquote-content content))
+	           (preprocess-quasimyquote (sub1 n) (unmyquote-content content))
 		   '()))))
-    ((quasiquote? content)
+    ((quasimyquote? content)
      (list 'cons
-	   (make-quote 'quasiquote)
+	   (make-myquote 'quasimyquote)
 	   (list 'cons
-                 (preprocess-quasiquote (add1 n) (quasiquote-content content))
+                 (preprocess-quasimyquote (add1 n) (quasimyquote-content content))
 		 '())))
     ((pair? content)
-     `(cons ,(preprocess-quasiquote n (car content))
-	    ,(preprocess-quasiquote n (cdr content))))
-    ; everything else can be handled by quote (immediate, string and symbol)
-    (else (preprocess-quote content))))
+     `(cons ,(preprocess-quasimyquote n (car content))
+	    ,(preprocess-quasimyquote n (cdr content))))
+    ; everything else can be handled by myquote (immediate, string and symbol)
+    (else (preprocess-myquote content))))
 

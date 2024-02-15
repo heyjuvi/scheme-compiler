@@ -371,8 +371,8 @@
     (emit-string (symbol->string x) tmp1 env)
     (emit-call1 "prim_string_to_symbol" tmp1 var)))
 
-(define (emit-quote x var env)
-  (let ((content (quote-content x)))
+(define (emit-myquote x var env)
+  (let ((content (myquote-content x)))
     (if (null? content)
       (emit-immediate '() var)
       ; we simply emit a symbol, preprocessing has eliminated
@@ -453,8 +453,8 @@
      (emit-begin x var env))
     ((closure? x)
      (emit-closure x var env))
-    ((quote? x)
-     (emit-quote x var env))
+    ((myquote? x)
+     (emit-myquote x var env))
     ((set!? x)
      (emit-global-set! x var env))
     ((list? x)

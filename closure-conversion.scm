@@ -46,8 +46,8 @@
 					  free
 					  (make-body substituted-body))))
 	   (make-closure name arity free)))
-	((quote? x)
-	 (make-quote (lambdas->closures (quote-content x))))
+	((myquote? x)
+	 (make-myquote (lambdas->closures (myquote-content x))))
 	((list? x) (map lambdas->closures x))
 	((immediate? x) x)
 	((var? x) x)
@@ -76,7 +76,7 @@
     ((string? x) '())
     ((vector-primcall? x) (set-union-many (map free-vars (cdr x))))
     ((set!? x) (free-vars (set!-val x)))
-    ((quote? x) '())
+    ((myquote? x) '())
     ((null? x) '())
     ((or (primcall? x) (vector-primcall? x) (list-primcall? x))
      (set-union-many (map free-vars (cdr x))))
@@ -98,7 +98,7 @@
     ; TODO: let
     ((immediate? x) x)
     ((string? x) x)
-    ((quote? x) x)
+    ((myquote? x) x)
     ((closure? x) x)
     ;((closure? x)
     ; (make-closure (closure-function x)
